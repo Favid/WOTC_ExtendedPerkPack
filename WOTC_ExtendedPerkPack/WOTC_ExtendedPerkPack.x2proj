@@ -38,6 +38,9 @@
     <Content Include="Config\XComGameData.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Config\XComSODragoon.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComVestSlot.ini">
       <SubType>Content</SubType>
     </Content>
@@ -81,6 +84,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Ability_ExtendedPerkPack.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Ability_SO_DragoonAbilitySet.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Ability_Stolen.uc">
@@ -142,6 +148,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ReloadPrimaryWeapon.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ShieldProtocol.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_SmokeToHitModifiers.uc">
