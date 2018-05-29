@@ -1,0 +1,3 @@
+[X2Ability_ExtendedPerkPack]
+LocCombatDrugsEffect="Combat Drugs"
+LocCombatDrugsEffectDescription="This smoke effect was created by a unit with Combat Drugs, and grants +<Ability:COMBATDRUGS_AIM/> aim and +<Ability:COMBATDRUGS_CRIT/> critical chance."

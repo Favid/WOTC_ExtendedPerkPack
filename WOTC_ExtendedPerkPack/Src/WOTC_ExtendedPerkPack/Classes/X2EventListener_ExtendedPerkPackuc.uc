@@ -1,0 +1,1 @@
+class X2EventListener_ExtendedPerkPackuc extends X2EventListener;

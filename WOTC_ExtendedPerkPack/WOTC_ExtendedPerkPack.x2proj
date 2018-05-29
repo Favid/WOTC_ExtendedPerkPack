@@ -1,0 +1,296 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Guid>fa0ec560-12a8-4583-918a-a0bf62a2b9ec</Guid>
+    <Name>WOTC_ExtendedPerkPack</Name>
+    <Description>Description of My XCOM 2 Mod.</Description>
+    <SteamPublishID>0</SteamPublishID>
+    <AssemblyName>WOTC_ExtendedPerkPack</AssemblyName>
+    <RootNamespace>WOTC_ExtendedPerkPack</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Config\" />
+    <Folder Include="Localization\" />
+    <Folder Include="Content" />
+    <Folder Include="Src\" />
+    <Folder Include="Src\LW_Tuple" />
+    <Folder Include="Src\LW_Tuple\Classes" />
+    <Folder Include="Src\XModBase_Interfaces" />
+    <Folder Include="Src\XModBase_Core_2_0_1" />
+    <Folder Include="Src\WOTC_ExtendedPerkPack\" />
+    <Folder Include="Src\WOTC_ExtendedPerkPack\Classes\" />
+    <Folder Include="Src\XModBase_Core_2_0_1\Classes" />
+    <Folder Include="Src\XModBase_Interfaces\Classes" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\XComClassData_egt.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComClassData_Test.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComClassData.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComExtendedPerkPack.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComGameData.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComVestSlot.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\Favid_Perks.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\UILibrary_FavidsPerkPack.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\UILibrary_FieldMedic.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\UILibrary_SOCombatEngineer.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\UILibrary_SODragoon.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\UILibrary_SOHunter.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\UILibrary_SOInfantry.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\UILibrary_XPerkIconPack.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\WOTC_ExtendedPerkPack.int">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ReadMe.txt" />
+    <Content Include="ModPreview.jpg" />
+    <Content Include="Config\XComEditor.ini" />
+    <Content Include="Config\XComEngine.ini" />
+    <Content Include="Config\XComGame.ini" />
+    <Content Include="Localization\XComGame.int" />
+    <Content Include="Src\LW_Tuple\Classes\LWTuple.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2AbilityTarget_SingleInRange.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Ability_ExtendedPerkPack.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Ability_Stolen.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_AbilityCostsAmmo.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_ClosestVisibleEnemy.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_Concealed.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_NonReactionFire.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_NotVisibleToEnemies.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_UnitAffectedByPhysicalEffect.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_WantsReload.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2DownloadableContentInfo_WOTC_ExtendedPerkPack.uc" />
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_AddGremlinAbilityCharges.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_AddOverwatchActionPoints.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ApplyHeal.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ConditionalBonusAgainstOwnerTargets.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_DamageImmune.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_Immobilize.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_IncreaseCooldowns.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_IncrementUntouchable.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_NoSquadsightPenalties.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_RefundAmmoCost.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_RefundConcealmentBreakingAction.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ReloadPrimaryWeapon.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_SmokeToHitModifiers.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_SuppressionDamage.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2EventListener_ExtendedPerkPackuc.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2TargetingMethod_CoverBlockingAOE.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBAbility.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBAbilityTrigger_EventListener.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_AbilityCost.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_AbilityHitResult.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_AbilityName.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_AbilityProperty.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_Concealed.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_CoverType.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_Dead.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_HeightAdvantage.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_MatchingWeapon.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_ReactionFire.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_SourceAbilities.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBCondition_WeaponName.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffectUtilities.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_AbilityCostRefund.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_AddAbility.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_AddAbilityCharges.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_AddItemCharges.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_AddUtilityItem.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_BonusDamageByDamageType.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_BonusRadius.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_ChangeHitResultForAttacker.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_ConditionalBonus.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_ConditionalStatChange.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_DoNotConsumeAllPoints.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_Extended.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_GrantReserveActionPoint.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_PermanentStatChange.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_RevealUnit.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBEffect_ToHitModifierByRange.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBTemplateUtilities.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBValue.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBValue_Distance.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBValue_UnitValue.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\XMBValue_Visibility.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBAbilityCost_ActionPoints.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBAbilityMultiTarget_Radius.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBAbilityTag.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBAbilityToHitCalc_StandardAim.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBConfig.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBDownloadableContentInfo_XModBase.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBTargetingMethod_Grenade.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Interfaces\Classes\XMBEffectInterface.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase_Interfaces\Classes\XMBOverrideInterface.uc">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
+</Project>
