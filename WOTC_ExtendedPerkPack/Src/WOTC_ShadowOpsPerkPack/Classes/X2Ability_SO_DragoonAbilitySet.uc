@@ -40,7 +40,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Templates;
 	
 	Templates.AddItem(ShieldProtocol());
-	//Templates.AddItem(HeavyArmor());
+	Templates.AddItem(HeavyArmor());
 	//Templates.AddItem(StealthProtocol());
 	//Templates.AddItem(BurstFire());
 	//Templates.AddItem(ShieldsUp());
@@ -180,4 +180,56 @@ static function X2Effect ShieldSurgeEffect()
 	ArmorEffect.TargetConditions.AddItem(Condition);
 
 	return ArmorEffect;
+}
+
+static function X2AbilityTemplate HeavyArmor()
+{
+	local X2AbilityTemplate						BaseTemplate;
+	local X2AbilityTemplate_Dragoon					Template;
+	local X2AbilityTargetStyle                  TargetStyle;
+	local X2AbilityTrigger						Trigger;
+	local X2Effect_HeavyArmor                   HeavyArmorEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(BaseTemplate, 'ShadowOps_HeavyArmor');
+	Template = new class'X2AbilityTemplate_Dragoon'(BaseTemplate);
+
+	// Icon Properties
+	Template.IconImage = "img:///UILibrary_SODragoon.UIPerk_heavyarmor";
+
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+
+	TargetStyle = new class'X2AbilityTarget_Self';
+	Template.AbilityTargetStyle = TargetStyle;
+
+	Trigger = new class'X2AbilityTrigger_UnitPostBeginPlay';
+	Template.AbilityTriggers.AddItem(Trigger);
+
+	HeavyArmorEffect = new class'X2Effect_HeavyArmor';
+	HeavyArmorEffect.Base = default.HeavyArmorBase;
+	HeavyArmorEffect.Bonus = default.HeavyArmorBonus;
+	HeavyArmorEffect.BuildPersistentEffect(1, true, true, true);
+	HeavyArmorEffect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage,,,Template.AbilitySourceName);
+	Template.AddTargetEffect(HeavyArmorEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	//  NOTE: No visualization on purpose!
+
+	Template.SetUIStatMarkup(class'XLocalizedData'.default.ArmorLabel, eStat_ArmorMitigation, default.HeavyArmorBase);
+	Template.SetUIBonusStatMarkup(class'XLocalizedData'.default.ArmorLabel, eStat_ArmorMitigation, default.HeavyArmorBonus, HeavyArmorStatDisplay);
+
+	Template.bCrossClassEligible = true;
+
+	return Template;
+}
+
+static function bool HeavyArmorStatDisplay(XComGameState_Item InventoryItem)
+{
+	local X2ArmorTemplate ArmorTemplate;
+	
+	ArmorTemplate = X2ArmorTemplate(InventoryItem.GetMyTemplate());
+	return (ArmorTemplate != none && ArmorTemplate.bHeavyWeapon);
 }
