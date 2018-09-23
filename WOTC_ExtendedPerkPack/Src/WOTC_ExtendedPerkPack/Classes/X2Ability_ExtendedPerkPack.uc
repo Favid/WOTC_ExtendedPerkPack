@@ -127,6 +127,15 @@ var config int OPENFIRE_CRIT;
 var config bool OPENFIRE_AWC;
 var config bool HAVOC_AWC;
 var config bool FINESSE_AWC;
+var config int SHOULDERTOLEANON_RADIUS;
+var config int SHOULDERTOLEANON_AIM_BONUS;
+var config bool SHOULDERTOLEANON_AWC;
+var config int BOLSTEREDWALL_DODGE_BONUS;
+var config bool BOLSTEREDWALL_AWC;
+var config bool PROTECTANDSERVE_AWC;
+var config bool FAULTLESSDEFENSE_AWC;
+var config int ADRENALINE_SHIELD;
+var config bool ADRENALINE_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -135,6 +144,8 @@ static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
     
+	Templates.AddItem(ShootAnyone());
+
 	Templates.AddItem(ChipAway());
 	Templates.AddItem(Concentration());
 	Templates.AddItem(LikeLightning());
@@ -187,8 +198,37 @@ static function array<X2DataTemplate> CreateTemplates()
     Templates.AddItem(OpenFire());
     Templates.AddItem(Havoc());
     Templates.AddItem(Finesse());
+    Templates.AddItem(ShoulderToLeanOn());
+    Templates.AddItem(BolsteredWall());
+    Templates.AddItem(ProtectAndServe());
+    Templates.AddItem(FaultlessDefense());
+    Templates.AddItem(Adrenaline());
     
 	return Templates;
+}
+
+// For testing purposes. Useful for seeing if defensive bonuses apply properly
+static function X2AbilityTemplate ShootAnyone()
+{
+	local X2AbilityTemplate Template;
+	local X2Condition_Visibility            VisibilityCondition;
+    local X2Effect_PersistentStatChange DisorientedEffect;
+
+	// Create a standard attack that doesn't cost an action.
+	Template = Attack('F_ShootAnyone', "img:///UILibrary_LW_PerkPack.LW_Ability_WalkingFire", false, none, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_Free, 1);
+
+	VisibilityCondition = new class'X2Condition_Visibility';
+	VisibilityCondition.bRequireGameplayVisible = true;
+	VisibilityCondition.bAllowSquadsight = true;
+
+	Template.AbilityTargetConditions.Length = 0;
+	Template.AbilityTargetConditions.AddItem(VisibilityCondition);
+	Template.AbilityTargetConditions.AddItem(default.LivingTargetOnlyProperty);
+
+    DisorientedEffect = class'X2StatusEffects'.static.CreateDisorientedStatusEffect();
+    Template.AddTargetEffect(DisorientedEffect);
+
+	return Template;
 }
 
 // Chip Away
@@ -2228,3 +2268,146 @@ static function X2AbilityTemplate Finesse()
 	// Create the template using a helper function
 	return Passive('F_Finesse', "img:///UILibrary_XPerkIconPack.UIPerk_knife_chevron", default.FINESSE_AWC, Effect);
 }
+
+// Shoulder to Lean On
+// (AbilityName="F_ShoulderToLeanOn")
+// 
+static function X2AbilityTemplate ShoulderToLeanOn()
+{
+    local XMBEffect_ConditionalBonus            Effect;
+	local X2AbilityTemplate                     Template;
+	local X2AbilityMultiTarget_Radius           RadiusMultiTarget;
+    local X2Condition_UnitProperty              TargetCondition;
+    
+	// Create the template using a helper function
+	Template = Passive('F_ShoulderToLeanOn', "", default.SHOULDERTOLEANON_AWC, none);
+	
+	// The ability targets the unit that has it, but also effects all nearby units that meet the conditions on the multitarget effect.
+	RadiusMultiTarget = new class'X2AbilityMultiTarget_Radius';
+	RadiusMultiTarget.fTargetRadius = default.SHOULDERTOLEANON_RADIUS;
+	RadiusMultiTarget.bIgnoreBlockingCover = true;
+    RadiusMultiTarget.bExcludeSelfAsTargetIfWithinRadius = true;
+	Template.AbilityMultiTargetStyle = RadiusMultiTarget;
+
+	// Create a conditional bonus effect for an aim bonus
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.EffectName = 'F_ShoulderToLeanOn_Bonuses';
+	Effect.AddToHitModifier(default.SHOULDERTOLEANON_AIM_BONUS, eHit_Success);
+	Template.AddMultiTargetEffect(Effect);
+    
+    // Allied squadmates only
+	TargetCondition = new class'X2Condition_UnitProperty';
+	TargetCondition.ExcludeHostileToSource = true;
+	TargetCondition.ExcludeFriendlyToSource = false;
+	TargetCondition.RequireSquadmates = true;
+	Template.AbilityMultiTargetConditions.AddItem(TargetCondition);
+
+	return Template;
+}
+
+// Bolstered Wall
+// (AbilityName="F_BolsteredWall")
+// 
+static function X2AbilityTemplate BolsteredWall()
+{
+    local XMBEffect_ConditionalBonus            Effect;
+	local X2AbilityTemplate                     Template;
+	local X2Condition_UnitEffectsOnSource       EffectsCondition;
+    
+	// Create a conditional bonus effect for a dodge bonus
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.EffectName = 'F_BolsteredWall_Bonuses';
+	Effect.AddToHitAsTargetModifier(default.BOLSTEREDWALL_DODGE_BONUS, eHit_Graze);
+
+	// Require Shield Wall effect
+	EffectsCondition = new class'X2Condition_UnitEffectsOnSource';
+	EffectsCondition.AddRequireEffect('ShieldWall', 'AA_MissingRequiredEffect');
+	Effect.TargetConditions.AddItem(EffectsCondition);
+    
+	// Create the template using a helper function
+	Template = Passive('F_BolsteredWall', "", default.BOLSTEREDWALL_AWC, Effect);
+
+	return Template;
+}
+
+// Protect and Serve
+// (AbilityName="F_ProtectAndServe")
+// 
+static function X2AbilityTemplate ProtectAndServe()
+{
+	local X2Effect_GrantActionPoints Effect;
+	local X2AbilityTemplate Template;
+    local XMBCondition_AbilityName NameCondition;
+
+	// Effect adds a Run and Gun action point
+	Effect = new class'X2Effect_GrantActionPoints';
+	Effect.NumActionPoints = 1;
+	Effect.PointType = class'X2CharacterTemplateManager'.default.RunAndGunActionPoint;
+
+	// Create a triggered ability that will activate whenever the unit uses an ability that meets the condition
+	Template = SelfTargetTrigger('F_ProtectAndServe', "", default.PROTECTANDSERVE_AWC, Effect, 'AbilityActivated');
+
+	// Only trigger with Shield Wall
+	NameCondition = new class'XMBCondition_AbilityName';
+	NameCondition.IncludeAbilityNames.AddItem('ShieldWall');
+	AddTriggerTargetCondition(Template, NameCondition);
+
+    return Template;
+}
+
+// Faultless Defense
+// (AbilityName="F_FaultlessDefense")
+// While Shield Wall is active, grazes against you are converted to misses
+static function X2AbilityTemplate FaultlessDefense()
+{
+	local X2AbilityTemplate Template;
+	local XMBEffect_ChangeHitResultForAttacker Effect;
+    local XMBCondition_AbilityName NameCondition;
+
+	// Create an effect that will change attack hit results
+	Effect = new class'X2Effect_ChangeHitResultForTarget';
+	Effect.EffectName = 'F_FaultlessDefense';
+    Effect.IncludeHitResults.AddItem(eHit_Graze);
+	Effect.NewResult = eHit_Miss;
+
+	// Only trigger with Shield Wall
+	NameCondition = new class'XMBCondition_AbilityName';
+	NameCondition.IncludeAbilityNames.AddItem('ShieldWall');
+	Effect.AbilityTargetConditions.AddItem(NameCondition);
+
+	// Create the template using a helper function
+	Template = Passive('F_FaultlessDefense', "", default.FAULTLESSDEFENSE_AWC, Effect);
+
+	return Template;
+}
+
+// Adrenaline
+// (AbilityName="F_Adrenaline", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// Kills with your primary weapon grant Shield. Passive.
+static function X2AbilityTemplate Adrenaline()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_PersistentStatChange Effect;
+    
+	// Create a persistent stat change effect that grants a mobility bonus
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'F_Adrenaline';
+	Effect.AddPersistentStatChange(eStat_ShieldHP, default.ADRENALINE_SHIELD);
+	Effect.DuplicateResponse = eDupe_Allow;
+	Effect.BuildPersistentEffect(1, true, true, false);
+	
+	// Create a triggered ability that activates whenever the unit gets a kill
+	Template = SelfTargetTrigger('F_Adrenaline', "", default.ADRENALINE_AWC, Effect, 'KillMail');
+    
+	// Effect only applies to matching weapon
+	AddTriggerTargetCondition(Template, default.MatchingWeaponCondition);
+
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
+
+	// Show a flyover when activated
+	Template.bShowActivation = true;
+
+	return Template;
+}
+

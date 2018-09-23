@@ -194,12 +194,6 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'CALLFORFIRE_COOLDOWN':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.CALLFORFIRE_COOLDOWN);
 			return true;
-		case 'CRITICALTARGET_CRIT_BONUS':
-			OutString = string(class'X2Ability_Stolen'.default.CRITICALTARGET_CRIT_BONUS);
-			return true;
-		case 'FOCUSEDDEFENSE_DEFENSE_BONUS':
-			OutString = string(class'X2Ability_Stolen'.default.FOCUSEDDEFENSE_DEFENSE_BONUS);
-			return true;
 		case 'KILLEMALL_COOLDOWN':
 			OutString = string(class'X2Ability_Stolen'.default.KILLEMALL_COOLDOWN);
 			return true;
@@ -257,15 +251,6 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'STIMULATE_RANGE_IN_TILES':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.STIMULATE_RANGE_IN_TILES);
 			return true;
-		case 'BREACH_AMMO_COST':
-			OutString = string(class'X2Ability_Stolen'.default.BREACH_AMMO_COST);
-			return true;
-		case 'BREACH_COOLDOWN':
-			OutString = string(class'X2Ability_Stolen'.default.BREACH_COOLDOWN);
-			return true;
-		case 'BREACH_SHRED':
-			OutString = string(class'X2Ability_Stolen'.default.BREACH_SHRED);
-			return true;
 		case 'BLOODLET_DURATION':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.BLOODLET_DURATION);
 			return true;
@@ -287,15 +272,6 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'BLINDINGFIRE_TARGET_AIM_PENALTY':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.BLINDINGFIRE_TARGET_AIM_PENALTY);
 			return true;
-		case 'SLAMFIRE_COOLDOWN':
-			OutString = string(class'X2Ability_Stolen'.default.SLAMFIRE_COOLDOWN);
-			return true;
-		case 'EATTHIS_MAX_TILES':
-			OutString = string(class'X2Ability_Stolen'.default.EATTHIS_MAX_TILES);
-			return true;
-		case 'FASTBALL_COOLDOWN':
-			OutString = string(class'X2Ability_Stolen'.default.FASTBALL_COOLDOWN);
-			return true;
 		case 'COMBATDRUGS_AIM':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.COMBATDRUGS_AIM);
 			return true;
@@ -304,9 +280,6 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		case 'SALTINTHEWOUND_DAMAGE_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SALTINTHEWOUND_DAMAGE_BONUS);
-			return true;
-		case 'VANISH_COOLDOWN':
-			OutString = string(class'X2Ability_Stolen'.default.VANISH_COOLDOWN);
 			return true;
 		case 'UNLOAD_COOLDOWN':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.UNLOAD_COOLDOWN);
@@ -340,6 +313,15 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		case 'BLEND_TURNS_CONCEALED':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.BLEND_TURNS_CONCEALED);
+			return true;
+		case 'SHOULDERTOLEANON_RADIUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHOULDERTOLEANON_RADIUS);
+			return true;
+		case 'SHOULDERTOLEANON_AIM_BONUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHOULDERTOLEANON_AIM_BONUS);
+			return true;
+		case 'BOLSTEREDWALL_DODGE_BONUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.BOLSTEREDWALL_DODGE_BONUS);
 			return true;
 		default: 
 			return false;

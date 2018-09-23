@@ -16,8 +16,6 @@
     <Folder Include="Src\LW_Tuple" />
     <Folder Include="Src\LW_Tuple\Classes" />
     <Folder Include="Src\XModBase" />
-    <Folder Include="Src\WOTC_ShadowOpsPerkPack" />
-    <Folder Include="Src\WOTC_ShadowOpsPerkPack\Classes" />
     <Folder Include="Src\XModBase\Classes" />
     <Folder Include="Src\XModBase_Interfaces" />
     <Folder Include="Src\XModBase_Core_2_0_1" />
@@ -42,9 +40,6 @@
     <Content Include="Config\XComGameData.ini">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Config\XComSODragoon.ini">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Config\XComVestSlot.ini">
       <SubType>Content</SubType>
     </Content>
@@ -55,18 +50,6 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Content\UILibrary_FieldMedic.upk">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Content\UILibrary_SOCombatEngineer.upk">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Content\UILibrary_SODragoon.upk">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Content\UILibrary_SOHunter.upk">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Content\UILibrary_SOInfantry.upk">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Content\UILibrary_XPerkIconPack.upk">
@@ -124,6 +107,9 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ApplyHeal.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ChangeHitResultForTarget.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ConditionalBonusAgainstOwnerTargets.uc">
       <SubType>Content</SubType>
     </Content>
@@ -161,45 +147,6 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2TargetingMethod_CoverBlockingAOE.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2AbilityCharges_GremlinTech.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2AbilityTemplate_Dragoon.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2AbilityToHitCalc_FastHacking.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Ability_SO_DragoonAbilitySet.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Condition_RestorationProtocol.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Effect_HeavyArmor.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Effect_IronWill.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Effect_MaybeApplyDirectionalWorldDamage.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Effect_Overkill.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Effect_RestorationProtocol.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Effect_SensorOverlays.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Effect_ShieldProtocol.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTC_ShadowOpsPerkPack\Classes\X2Effect_Supercharge.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\XModBase\Classes\XMBAbility.uc">
