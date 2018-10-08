@@ -136,6 +136,12 @@ var config bool PROTECTANDSERVE_AWC;
 var config bool FAULTLESSDEFENSE_AWC;
 var config int ADRENALINE_SHIELD;
 var config bool ADRENALINE_AWC;
+var config int WATCHTHEMRUN_ACTIVATIONS_PER_TURN;
+var config bool WATCHTHEMRUN_AWC;
+var config float COVERAREA_EXPLOSIVE_DAMAGE_REDUCTION;
+var config int COVERAREA_RADIUS;
+var config bool COVERAREA_AWC;
+var config int WEIGHTLESS_MOBILITY;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -199,10 +205,19 @@ static function array<X2DataTemplate> CreateTemplates()
     Templates.AddItem(Havoc());
     Templates.AddItem(Finesse());
     Templates.AddItem(ShoulderToLeanOn());
+    Templates.AddItem(ShoulderToLeanOnPassive());
     Templates.AddItem(BolsteredWall());
     Templates.AddItem(ProtectAndServe());
     Templates.AddItem(FaultlessDefense());
     Templates.AddItem(Adrenaline());
+    Templates.AddItem(WatchThemRun());
+    Templates.AddItem(CoverArea());
+    Templates.AddItem(CoverAreaPassive());
+    Templates.AddItem(Rally());
+    Templates.AddItem(ShieldTrauma());
+    Templates.AddItem(Weightless());
+    Templates.AddItem(Avenger());
+    Templates.AddItem(FireFirst());
     
 	return Templates;
 }
@@ -212,7 +227,7 @@ static function X2AbilityTemplate ShootAnyone()
 {
 	local X2AbilityTemplate Template;
 	local X2Condition_Visibility            VisibilityCondition;
-    local X2Effect_PersistentStatChange DisorientedEffect;
+    local X2Effect_Persistent DisorientedEffect;
 
 	// Create a standard attack that doesn't cost an action.
 	Template = Attack('F_ShootAnyone', "img:///UILibrary_LW_PerkPack.LW_Ability_WalkingFire", false, none, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_Free, 1);
@@ -225,7 +240,7 @@ static function X2AbilityTemplate ShootAnyone()
 	Template.AbilityTargetConditions.AddItem(VisibilityCondition);
 	Template.AbilityTargetConditions.AddItem(default.LivingTargetOnlyProperty);
 
-    DisorientedEffect = class'X2StatusEffects'.static.CreateDisorientedStatusEffect();
+    DisorientedEffect = class'X2StatusEffects'.static.CreateUnconsciousStatusEffect();
     Template.AddTargetEffect(DisorientedEffect);
 
 	return Template;
@@ -2274,61 +2289,67 @@ static function X2AbilityTemplate Finesse()
 // 
 static function X2AbilityTemplate ShoulderToLeanOn()
 {
-    local XMBEffect_ConditionalBonus            Effect;
-	local X2AbilityTemplate                     Template;
-	local X2AbilityMultiTarget_Radius           RadiusMultiTarget;
-    local X2Condition_UnitProperty              TargetCondition;
-    
-	// Create the template using a helper function
-	Template = Passive('F_ShoulderToLeanOn', "", default.SHOULDERTOLEANON_AWC, none);
-	
-	// The ability targets the unit that has it, but also effects all nearby units that meet the conditions on the multitarget effect.
-	RadiusMultiTarget = new class'X2AbilityMultiTarget_Radius';
-	RadiusMultiTarget.fTargetRadius = default.SHOULDERTOLEANON_RADIUS;
-	RadiusMultiTarget.bIgnoreBlockingCover = true;
-    RadiusMultiTarget.bExcludeSelfAsTargetIfWithinRadius = true;
-	Template.AbilityMultiTargetStyle = RadiusMultiTarget;
+	local X2AbilityTemplate             Template;
+	local X2Effect_ToHitBonusAOE               Effect;
 
-	// Create a conditional bonus effect for an aim bonus
-	Effect = new class'XMBEffect_ConditionalBonus';
-	Effect.EffectName = 'F_ShoulderToLeanOn_Bonuses';
-	Effect.AddToHitModifier(default.SHOULDERTOLEANON_AIM_BONUS, eHit_Success);
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_ShoulderToLeanOn');
+
+	Template.IconImage = "";
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+
+	Effect = new class'X2Effect_ToHitBonusAOE';
+	Effect.BuildPersistentEffect(1, true, false);
+	Effect.ToHitBonus = default.SHOULDERTOLEANON_AIM_BONUS;
+	Effect.AOEDistanceSquared = default.SHOULDERTOLEANON_RADIUS;
+    Effect.IncludeOwner = false;
+	Effect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
 	Template.AddMultiTargetEffect(Effect);
-    
-    // Allied squadmates only
-	TargetCondition = new class'X2Condition_UnitProperty';
-	TargetCondition.ExcludeHostileToSource = true;
-	TargetCondition.ExcludeFriendlyToSource = false;
-	TargetCondition.RequireSquadmates = true;
-	Template.AbilityMultiTargetConditions.AddItem(TargetCondition);
+
+	Template.bSkipFireAction = true;
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	Template.AdditionalAbilities.AddItem('F_ShoulderToLeanOn_Passive');
 
 	return Template;
+}
+
+static function X2AbilityTemplate ShoulderToLeanOnPassive()
+{
+	return PurePassive('F_ShoulderToLeanOn_Passive', "", , 'eAbilitySource_Perk');
 }
 
 // Bolstered Wall
 // (AbilityName="F_BolsteredWall")
 // 
-static function X2AbilityTemplate BolsteredWall()
-{
-    local XMBEffect_ConditionalBonus            Effect;
-	local X2AbilityTemplate                     Template;
-	local X2Condition_UnitEffectsOnSource       EffectsCondition;
-    
-	// Create a conditional bonus effect for a dodge bonus
-	Effect = new class'XMBEffect_ConditionalBonus';
-	Effect.EffectName = 'F_BolsteredWall_Bonuses';
-	Effect.AddToHitAsTargetModifier(default.BOLSTEREDWALL_DODGE_BONUS, eHit_Graze);
-
-	// Require Shield Wall effect
-	EffectsCondition = new class'X2Condition_UnitEffectsOnSource';
-	EffectsCondition.AddRequireEffect('ShieldWall', 'AA_MissingRequiredEffect');
-	Effect.TargetConditions.AddItem(EffectsCondition);
-    
-	// Create the template using a helper function
-	Template = Passive('F_BolsteredWall', "", default.BOLSTEREDWALL_AWC, Effect);
-
-	return Template;
-}
+//static function X2AbilityTemplate BolsteredWall()
+//{
+    //local XMBEffect_ConditionalBonus            Effect;
+	//local X2AbilityTemplate                     Template;
+	//local X2Condition_UnitEffectsOnSource       EffectsCondition;
+    //
+	//// Create a conditional bonus effect for a dodge bonus
+	//Effect = new class'XMBEffect_ConditionalBonus';
+	//Effect.EffectName = 'F_BolsteredWall_Bonuses';
+	//Effect.AddToHitAsTargetModifier(default.BOLSTEREDWALL_DODGE_BONUS, eHit_Graze);
+//
+	//// Require Shield Wall effect
+	//EffectsCondition = new class'X2Condition_UnitEffectsOnSource';
+	//EffectsCondition.AddRequireEffect('ShieldWall', 'AA_MissingRequiredEffect');
+	//Effect.TargetConditions.AddItem(EffectsCondition);
+    //
+	//// Create the template using a helper function
+	//Template = Passive('F_BolsteredWall', "", default.BOLSTEREDWALL_AWC, Effect);
+//
+	//return Template;
+//}
 
 // Protect and Serve
 // (AbilityName="F_ProtectAndServe")
@@ -2355,30 +2376,63 @@ static function X2AbilityTemplate ProtectAndServe()
     return Template;
 }
 
+// Bolstered Wall
+// (AbilityName="F_BolsteredWall")
+// 
+static function X2AbilityTemplate BolsteredWall()
+{
+	return PurePassive('F_BolsteredWall', "", , 'eAbilitySource_Perk');
+}
+
+// Added to ShieldWall in OnPostTemplatesCreated()
+static function X2Effect_PersistentStatChange BolsteredWallEffect()
+{
+    local X2Effect_PersistentStatChange		    Effect;
+	local X2Condition_AbilityProperty   Condition;
+
+    // Create the dodge bonus effect
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'F_BolsteredWall_Bonus';
+	Effect.AddPersistentStatChange(eStat_Dodge, default.BOLSTEREDWALL_DODGE_BONUS);
+	Effect.DuplicateResponse = eDupe_Refresh;
+	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
+    Effect.SetDisplayInfo(ePerkBuff_Bonus, "Bolstered Wall", "", "", true, , 'eAbilitySource_Perk');
+
+    // Only apply if user has the Bolstered Wall passive
+	Condition = new class'X2Condition_AbilityProperty';
+	Condition.OwnerHasSoldierAbilities.AddItem('F_BolsteredWall');
+	Effect.TargetConditions.AddItem(Condition);
+
+	return Effect;
+}
+
 // Faultless Defense
 // (AbilityName="F_FaultlessDefense")
-// While Shield Wall is active, grazes against you are converted to misses
+// While Shield Wall is active, you cannot be critically hit
 static function X2AbilityTemplate FaultlessDefense()
 {
-	local X2AbilityTemplate Template;
-	local XMBEffect_ChangeHitResultForAttacker Effect;
-    local XMBCondition_AbilityName NameCondition;
+	return PurePassive('F_FaultlessDefense', "", , 'eAbilitySource_Perk');
+}
 
-	// Create an effect that will change attack hit results
-	Effect = new class'X2Effect_ChangeHitResultForTarget';
-	Effect.EffectName = 'F_FaultlessDefense';
-    Effect.IncludeHitResults.AddItem(eHit_Graze);
-	Effect.NewResult = eHit_Miss;
+// Added to ShieldWall in OnPostTemplatesCreated()
+static function X2Effect_CannotBeCrit FaultlessDefenseEffect()
+{
+    local X2Effect_CannotBeCrit		    Effect;
+	local X2Condition_AbilityProperty   Condition;
 
-	// Only trigger with Shield Wall
-	NameCondition = new class'XMBCondition_AbilityName';
-	NameCondition.IncludeAbilityNames.AddItem('ShieldWall');
-	Effect.AbilityTargetConditions.AddItem(NameCondition);
+    // Create the crit protection effect
+    Effect = new class'X2Effect_CannotBeCrit';
+	Effect.EffectName = 'F_Faultless_CritProtection';
+	Effect.DuplicateResponse = eDupe_Refresh;
+	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
+    Effect.SetDisplayInfo(ePerkBuff_Bonus, "Faultess Defense", "", "", true, , 'eAbilitySource_Perk');
 
-	// Create the template using a helper function
-	Template = Passive('F_FaultlessDefense', "", default.FAULTLESSDEFENSE_AWC, Effect);
+    // Only apply if user has the Faultless Defense passive
+	Condition = new class'X2Condition_AbilityProperty';
+	Condition.OwnerHasSoldierAbilities.AddItem('F_FaultlessDefense');
+	Effect.TargetConditions.AddItem(Condition);
 
-	return Template;
+	return Effect;
 }
 
 // Adrenaline
@@ -2411,3 +2465,300 @@ static function X2AbilityTemplate Adrenaline()
 	return Template;
 }
 
+// Watch Them Run
+// (AbilityName="F_WatchThemRun")
+// If you have thrown or launched a grenade this turn, automatically enter overwatch at the end of the turn.
+static function X2AbilityTemplate WatchThemRun()
+{
+	local X2AbilityTemplate                 Template;
+	local X2Condition_AbilitySourceWeapon   AmmoCondition;
+	local XMBCondition_AbilityName   NameCondition;
+    local X2Effect_AddOverwatchActionPoints   Effect;
+    local X2Condition_UnitValue ValueCondition;
+    local X2Effect_IncrementUnitValue IncrementEffect;
+	
+    // Effect granting an overwatch shot
+	Effect = new class'X2Effect_AddOverwatchActionPoints';
+    
+	Template = SelfTargetTrigger('F_WatchThemRun', "", default.WATCHTHEMRUN_AWC, Effect, 'AbilityActivated');
+    Template.bShowActivation = true;
+
+	// Only when Throw/Launch Grenade abilities are used
+	NameCondition = new class'XMBCondition_AbilityName';
+	NameCondition.IncludeAbilityNames.AddItem('ThrowGrenade');
+	NameCondition.IncludeAbilityNames.AddItem('LaunchGrenade');
+	AddTriggerTargetCondition(Template, NameCondition);
+
+    // Require that the user has ammo left
+	AmmoCondition = new class'X2Condition_AbilitySourceWeapon';
+	AmmoCondition.AddAmmoCheck(0, eCheck_GreaterThan);
+	AddTriggerTargetCondition(Template, AmmoCondition);
+    
+	// Limit activations
+	ValueCondition = new class'X2Condition_UnitValue';
+	ValueCondition.AddCheckValue('F_WatchThemRun_Activations', default.WATCHTHEMRUN_ACTIVATIONS_PER_TURN, eCheck_LessThan);
+	Template.AbilityTargetConditions.AddItem(ValueCondition);
+
+    // Create an effect that will increment the unit value
+	IncrementEffect = new class'X2Effect_IncrementUnitValue';
+	IncrementEffect.UnitName = 'F_WatchThemRun_Activations';
+	IncrementEffect.NewValueToSet = 1; // This means increment by one -- stupid property name
+	IncrementEffect.CleanupType = eCleanup_BeginTurn;
+    Template.AddTargetEffect(IncrementEffect);
+	
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
+
+    return Template;
+}
+
+// Cover Area
+// (AbilityName="F_CoverArea")
+// Allies within 2 tiles receive half damage from explosives. Passive.
+static function X2AbilityTemplate CoverArea()
+{
+	local X2AbilityTemplate             Template;
+	local X2Effect_ReduceExplosiveDamage               Effect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_CoverArea');
+
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_solace";
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+
+	Effect = new class'X2Effect_ReduceExplosiveDamage';
+	Effect.BuildPersistentEffect(1, true, false);
+	Effect.ExplosiveDamageReduction = default.COVERAREA_EXPLOSIVE_DAMAGE_REDUCTION;
+	Effect.AOEDistanceSquared = default.COVERAREA_RADIUS;
+    Effect.IncludeOwner = true;
+	Effect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
+	Template.AddMultiTargetEffect(Effect);
+
+	Template.bSkipFireAction = true;
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	Template.AdditionalAbilities.AddItem('F_CoverArea_Passive');
+
+	return Template;
+}
+
+static function X2AbilityTemplate CoverAreaPassive()
+{
+	return PurePassive('F_CoverArea_Passive', "img:///UILibrary_PerkIcons.UIPerk_solace", , 'eAbilitySource_Perk');
+}
+
+// Outlaw
+// (AbilityName="F_Outlaw")
+// Gain bonus mobility for each enemy you can see, up to a specified maximum.
+//static function X2AbilityTemplate Outlaw()
+//{
+	//local XMBEffect_ConditionalStatChange Effect;
+	//local XMBValue_Visibility Value;
+	 //
+	//// Create a value that will count the number of visible units
+	//Value = new class'XMBValue_Visibility';
+//
+	//// Only count enemy units
+	//Value.bCountEnemies = true;
+//
+	//// Create a conditional stat change effect
+	//Effect = new class'XMBEffect_ConditionalStatChange';
+	//Effect.EffectName = 'F_Outlaw_Bonus';
+	//Effect.DuplicateResponse = eDupe_Ignore;
+//
+	//// The effect adds Mobility per enemy unit
+	//Effect.AddPersistentStatChange(eStat_Mobility, OUTLAW_MOBILITY_BONUS);
+//
+	//// The effect scales with the number of visible enemy units, to a maximum
+	//Effect.ScaleValue = Value;
+	//Effect.ScaleMax = default.OUTLAW_SCALE_MAX;
+//
+	//// Create the template using a helper function
+	//return Passive('F_Outlaw', "", default.OUTLAW_AWC, Effect);
+//}
+
+static function X2AbilityTemplate Rally()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityCost_ActionPoints ActionPointCost;
+	local X2AbilityCharges Charges;
+	local X2AbilityCost_Charges ChargeCost;
+	local X2Condition_UnitProperty UnitPropertyCondition;
+	local X2AbilityTrigger_PlayerInput InputTrigger;
+	local X2Effect_GrantShields ShieldedEffect;
+	local X2AbilityMultiTarget_Radius MultiTarget;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Rally');
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_adventshieldbearer_energyshield";
+
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+	Template.AbilitySourceName = 'eAbilitySource_Standard';
+	Template.Hostility = eHostility_Defensive;
+
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.iNumPoints = 1;
+	ActionPointCost.bConsumeAllPoints = true;
+	Template.AbilityCosts.AddItem(ActionPointCost);
+
+	Charges = new class 'X2AbilityCharges';
+	Charges.InitialCharges = 1;
+	Template.AbilityCharges = Charges;
+
+	ChargeCost = new class'X2AbilityCost_Charges';
+	ChargeCost.NumCharges = 1;
+	Template.AbilityCosts.AddItem(ChargeCost);
+
+	//Can't use while dead
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	// Add dead eye to guarantee
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+
+	// Multi target
+	MultiTarget = new class'X2AbilityMultiTarget_Radius';
+	MultiTarget.fTargetRadius = 7; // TODO
+	MultiTarget.bIgnoreBlockingCover = true;
+	Template.AbilityMultiTargetStyle = MultiTarget;
+
+	InputTrigger = new class'X2AbilityTrigger_PlayerInput';
+	Template.AbilityTriggers.AddItem(InputTrigger);
+
+	// The Targets must be within the AOE, LOS, and friendly
+	UnitPropertyCondition = new class'X2Condition_UnitProperty';
+	UnitPropertyCondition.ExcludeDead = true;
+	UnitPropertyCondition.ExcludeFriendlyToSource = false;
+	UnitPropertyCondition.ExcludeHostileToSource = true;
+	UnitPropertyCondition.ExcludeCivilian = true;
+	UnitPropertyCondition.FailOnNonUnits = true;
+	Template.AbilityMultiTargetConditions.AddItem(UnitPropertyCondition);
+
+	// Friendlies in the radius receives a shield receives a shield
+	ShieldedEffect = new class'X2Effect_GrantShields';
+	ShieldedEffect.BuildPersistentEffect(1, true, true, false, eGameRule_PlayerTurnBegin);
+	ShieldedEffect.ConventionalAmount = 3;
+	ShieldedEffect.MagneticAmount = 5;
+	ShieldedEffect.BeamAmount = 7;
+	ShieldedEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocLongDescription, "img:///UILibrary_PerkIcons.UIPerk_adventshieldbearer_energyshield", true);
+	ShieldedEffect.VisualizationFn = EffectFlyOver_Visualization;
+
+	Template.AddTargetEffect(ShieldedEffect);
+	Template.AddMultiTargetEffect(ShieldedEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+    
+	Template.CustomFireAnim = 'HL_SignalPoint';
+
+	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
+	
+	return Template;
+}
+
+static function X2AbilityTemplate ShieldTrauma()
+{
+	local X2AbilityTemplate                 Template;
+
+	Template = class'X2Ability_RangerAbilitySet'.static.AddSwordSliceAbility('F_ShieldTrauma');
+
+	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateDisorientedStatusEffect(true, , false));
+	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateStunnedStatusEffect(1, 100, false));
+    
+	Template.OverrideAbilities.AddItem('ShieldBash');
+
+	return Template;
+}
+
+static function X2AbilityTemplate Weightless()
+{
+	local X2Effect_PersistentStatChange			StatEffect;
+	local X2AbilityTemplate 					Template;
+
+	StatEffect = new class'X2Effect_PersistentStatChange';
+	StatEffect.AddPersistentStatChange(eStat_Mobility, default.WEIGHTLESS_MOBILITY);
+
+	Template = Passive('F_Weightless', "img:///UILibrary_LW_PerkPack.LW_AbilityExtraConditioning", false, StatEffect);;
+	Template.SetUIStatMarkup(class'XLocalizedData'.default.MobilityLabel, eStat_Mobility, default.WEIGHTLESS_MOBILITY);
+
+	return Template;
+}
+
+static function X2AbilityTemplate Avenger()
+{
+	local X2AbilityTemplate						Template;
+	local X2AbilityTargetStyle                  TargetStyle;
+	local X2AbilityTrigger						Trigger;
+	local X2Effect_ReturnFireAOE                FireEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Avenger');
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_returnfire";
+
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+
+	TargetStyle = new class'X2AbilityTarget_Self';
+	Template.AbilityTargetStyle = TargetStyle;
+
+	Trigger = new class'X2AbilityTrigger_UnitPostBeginPlay';
+	Template.AbilityTriggers.AddItem(Trigger);
+
+	FireEffect = new class'X2Effect_ReturnFireAOE';
+    FireEffect.RequiredAllyRange = 4; // TODO config
+    FireEffect.bAllowSelf = false;
+	FireEffect.BuildPersistentEffect(1, true, false, false, eGameRule_PlayerTurnBegin);
+	FireEffect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage,,,Template.AbilitySourceName);
+	Template.AddTargetEffect(FireEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	//  NOTE: No visualization on purpose!
+
+	Template.bCrossClassEligible = false;       //  this can only work with pistols, which only sharpshooters have
+
+	return Template;
+}
+
+static function X2AbilityTemplate FireFirst()
+{
+	local X2AbilityTemplate						Template;
+	local X2AbilityTargetStyle                  TargetStyle;
+	local X2AbilityTrigger						Trigger;
+	local X2Effect_ReturnFire                   FireEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_FireFirst');
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_returnfire";
+
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+
+	TargetStyle = new class'X2AbilityTarget_Self';
+	Template.AbilityTargetStyle = TargetStyle;
+
+	Trigger = new class'X2AbilityTrigger_UnitPostBeginPlay';
+	Template.AbilityTriggers.AddItem(Trigger);
+
+	FireEffect = new class'X2Effect_ReturnFire';
+    FireEffect.bPreEmptiveFire = true;
+	FireEffect.BuildPersistentEffect(1, true, false, false, eGameRule_PlayerTurnBegin);
+	FireEffect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage,,,Template.AbilitySourceName);
+	Template.AddTargetEffect(FireEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	//  NOTE: No visualization on purpose!
+
+	Template.bCrossClassEligible = false;       //  this can only work with pistols, which only sharpshooters have
+
+	return Template;
+}

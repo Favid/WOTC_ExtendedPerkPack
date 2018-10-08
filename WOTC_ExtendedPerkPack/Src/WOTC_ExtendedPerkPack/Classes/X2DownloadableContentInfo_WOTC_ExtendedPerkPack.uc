@@ -45,6 +45,9 @@ static event OnPostTemplatesCreated()
     PatchAbilityForHavoc('Suppression');
     PatchAbilityForHavoc('LW2WotC_AreaSuppression');
 
+    PatchAbilityForFaultlessDefense('ShieldWall');
+    PatchAbilityForBolsteredWall('ShieldWall');
+    
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenade');
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenadeMk2');
 
@@ -95,6 +98,30 @@ static function PatchAbilityForHavoc(name AbilityName)
 	if (Template != none)
 	{
 	    Template.DamagePreviewFn = class'X2Ability_ExtendedPerkPack'.static.HavocDamagePreview;
+	}
+}
+
+static function PatchAbilityForFaultlessDefense(name AbilityName)
+{
+	local X2AbilityTemplate Template;
+
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(AbilityName);
+
+	if (Template != none)
+	{
+		Template.AddTargetEffect(class'X2Ability_ExtendedPerkPack'.static.FaultlessDefenseEffect());
+	}
+}
+
+static function PatchAbilityForBolsteredWall(name AbilityName)
+{
+	local X2AbilityTemplate Template;
+
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(AbilityName);
+
+	if (Template != none)
+	{
+		Template.AddTargetEffect(class'X2Ability_ExtendedPerkPack'.static.BolsteredWallEffect());
 	}
 }
 
@@ -315,13 +342,16 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.BLEND_TURNS_CONCEALED);
 			return true;
 		case 'SHOULDERTOLEANON_RADIUS':
-			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHOULDERTOLEANON_RADIUS);
+			OutString = string(int(Sqrt(class'X2Ability_ExtendedPerkPack'.default.SHOULDERTOLEANON_RADIUS)));
 			return true;
 		case 'SHOULDERTOLEANON_AIM_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHOULDERTOLEANON_AIM_BONUS);
 			return true;
 		case 'BOLSTEREDWALL_DODGE_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.BOLSTEREDWALL_DODGE_BONUS);
+			return true;
+		case 'COVERAREA_RADIUS':
+			OutString = string(int(Sqrt(class'X2Ability_ExtendedPerkPack'.default.COVERAREA_RADIUS)));
 			return true;
 		default: 
 			return false;

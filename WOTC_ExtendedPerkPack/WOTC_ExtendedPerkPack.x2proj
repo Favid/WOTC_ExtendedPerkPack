@@ -107,6 +107,9 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ApplyHeal.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_CannotBeCrit.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ChangeHitResultForTarget.uc">
       <SubType>Content</SubType>
     </Content>
@@ -114,6 +117,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_DamageImmune.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_GrantShields.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_Immobilize.uc">
@@ -128,6 +134,12 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_NoSquadsightPenalties.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_PersistentAOE.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ReduceExplosiveDamage.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_RefundAmmoCost.uc">
       <SubType>Content</SubType>
     </Content>
@@ -137,10 +149,19 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ReloadPrimaryWeapon.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ReturnFireAOE.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ScaledConditionalStatChange.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_SmokeToHitModifiers.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_SuppressionDamage.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ToHitBonusAOE.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2EventListener_ExtendedPerkPackuc.uc">
