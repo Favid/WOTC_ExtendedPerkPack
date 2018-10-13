@@ -1,3 +1,9 @@
 [X2Ability_ExtendedPerkPack]
 LocCombatDrugsEffect="Combat Drugs"
 LocCombatDrugsEffectDescription="This smoke effect was created by a unit with Combat Drugs, and grants +<Ability:COMBATDRUGS_AIM/> aim and +<Ability:COMBATDRUGS_CRIT/> critical chance."
+
+LocBolsteredWallEffect="Bolstered Wall"
+LocBolsteredWallEffectDescription="While Shield Wall is in effect, gain +<Ability:BOLSTEREDWALL_DODGE_BONUS/> bonus Dodge."
+
+LocFaultlessDefenseEffect="Faultless Defense"
+LocFaultlessDefenseEffectDescription="While Shield Wall is active, you cannot be critically hit."

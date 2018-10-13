@@ -69,7 +69,6 @@ var config bool RESUPPLY_AWC;
 var config int IMMUNIZE_CHARGES;
 var config bool IMMUNIZE_AWC;
 var config bool RUSH_AWC;
-var config bool ARMEDTOTHETEETH_AWC;
 var config bool AMMOCONSERVATION_AWC;
 var config int AMMOCONSERVATION_COOLDOWN;
 var config bool WELLPROTECTED_AWC;
@@ -146,11 +145,16 @@ var config int RALLY_CHARGES;
 var config int RALLY_SHIELD_CV;
 var config int RALLY_SHIELD_MG;
 var config int RALLY_SHIELD_BM;
-var config int WEIGHTLESS_MOBILITY;
 var config int AVENGER_RADIUS;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
+
+var localized string LocBolsteredWallEffect;
+var localized string LocBolsteredWallEffectDescription;
+
+var localized string LocFaultlessDefenseEffect;
+var localized string LocFaultlessDefenseEffectDescription;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -185,7 +189,6 @@ static function array<X2DataTemplate> CreateTemplates()
     Templates.AddItem(Resupply());
     Templates.AddItem(Immunize());
     Templates.AddItem(Rush());
-    Templates.AddItem(ArmedToTheTeeth());
     Templates.AddItem(AmmoConservation());
     Templates.AddItem(WellProtected());
     Templates.AddItem(Dedication());
@@ -220,7 +223,6 @@ static function array<X2DataTemplate> CreateTemplates()
     Templates.AddItem(CoverAreaPassive());
     Templates.AddItem(Rally());
     Templates.AddItem(ShieldTrauma());
-    Templates.AddItem(Weightless());
     Templates.AddItem(Avenger());
     Templates.AddItem(FireFirst());
     
@@ -1056,7 +1058,7 @@ static function X2AbilityTemplate DisablingShot()
 
 // Blend
 // (AbilityName="F_Blend")
-// Immediately grants concealment that is automatically broken at the beginning of next turn.
+// Immediately grants concealment that is automatically broken after a few turns.
 static function X2AbilityTemplate Blend()
 {
     local X2AbilityTemplate     Template;
@@ -1336,15 +1338,6 @@ static function X2AbilityTemplate Rush()
 	return Template;
 }
 
-// Armed To The Teeth
-// (AbilityName="F_ArmedToTheTeeth")
-// Grants an ammo only utility slot. Passive.
-static function X2AbilityTemplate ArmedToTheTeeth()
-{
-	// Create the template using a helper function - XcomGameData.ini sets this perk as unlocking the ammo pocket
-	return Passive('F_ArmedToTheTeeth', "img:///UILibrary_FavidsPerkPack.UIPerk_ArmedToTheTeeth", default.ARMEDTOTHETEETH_AWC, none);
-}
-
 // Ammo Conservation
 // (AbilityName="F_AmmoConservation")
 // Activated ability that does not cost an action point. Until the beginning of next turn, your ammo will be refunded after each shot you take. Cooldown-based.
@@ -1367,6 +1360,7 @@ static function X2AbilityTemplate AmmoConservation()
 	return Template;
 }
 
+// TODO consolidate with Pharmacist
 // Well Protected
 // (AbilityName="F_WellProtected")
 // Grants a vest only utility slot. Passive.
@@ -1376,6 +1370,7 @@ static function X2AbilityTemplate WellProtected()
 	return Passive('F_WellProtected', "img:///UILibrary_XPerkIconPack.UIPerk_defense_box", default.WELLPROTECTED_AWC, none);
 }
 
+// TODO consolidate with Pharmacist
 // Dedication
 // (AbilityName="F_Dedication")
 // Free action. Gain bonus mobility and ignore reaction fire for the rest of the turn. Cooldown-based.
@@ -1454,6 +1449,7 @@ static function X2AbilityTemplate Triage()
 	return Template;
 }
 
+// TODO consolidate with Pharmacist
 // Steadfast
 // (AbilityName="F_Steadfast")
 // Grants immunity to negative mental conditions including panic, mind control, stuns, and disorientation.
@@ -1508,6 +1504,7 @@ static function X2AbilityTemplate FieldMedic()
 	return Template;
 }
 
+// TODO consolidate with Pharmacist
 // Stimulate
 // (AbilityName="F_Stimulate")
 // Once per turn, you may remove mental impairments from a nearby ally.
@@ -1545,6 +1542,7 @@ static function X2AbilityTemplate Stimulate()
 	return Template;
 }
 
+// TODO consolidate with Pharmacist
 // Bloodlet
 // (AbilityName="F_Bloodlet")
 // Standard shots from your primary weapon or a pistol now cause bleeding.
@@ -1748,7 +1746,7 @@ static function X2AbilityTemplate QuickFeet()
 // Your smoke grenades confer bonuses to aim and critical chance.
 static function X2AbilityTemplate CombatDrugs()
 {
-	return Passive('F_CombatDrugs', "img:///UILibrary_SOCombatEngineer.UIPerk_combatdrugs", default.COMBATDRUGS_AWC, none);
+	return Passive('F_CombatDrugs', "img:///UILibrary_XPerkIconPack.UIPerk_smoke_shot_2", default.COMBATDRUGS_AWC, none);
 }
 
 // Added to SmokeGrenade and SmokeBomb in OnPostTemplatesCreated()
@@ -1760,7 +1758,7 @@ static function X2Effect CombatDrugsEffect()
 	// Aim and crit bonuses
 	Effect = new class'X2Effect_SmokeToHitModifiers';
 	Effect.BuildPersistentEffect(class'X2Effect_ApplySmokeGrenadeToWorld'.default.Duration + 1, false, false, false, eGameRule_PlayerTurnBegin);
-	Effect.SetDisplayInfo(ePerkBuff_Bonus, default.LocCombatDrugsEffect, default.LocCombatDrugsEffectDescription, "img:///UILibrary_SOCombatEngineer.UIPerk_combatdrugs");
+	Effect.SetDisplayInfo(ePerkBuff_Bonus, default.LocCombatDrugsEffect, default.LocCombatDrugsEffectDescription, "img:///UILibrary_XPerkIconPack.UIPerk_smoke_shot_2");
 	Effect.AimMod = default.COMBATDRUGS_AIM;
 	Effect.CritMod = default.COMBATDRUGS_CRIT;
 	Effect.DuplicateResponse = eDupe_Refresh;
@@ -1917,7 +1915,6 @@ static function X2AbilityTemplate UnloadDamageBonus()
 static function X2AbilityTemplate Ambush()
 {
 	local X2AbilityTemplate                 Template;
-    //local X2Condition_UnitProperty          ConcealedCondition;
     local X2Effect                          Effect;
     local X2Effect_MarkValidActivationTiles MarkTilesEffect;
 
@@ -2098,6 +2095,7 @@ static function X2AbilityTemplate Renewal()
 	return Template;
 }
 
+// TODO consolidate with Pharmacist
 // Warning Shot
 // (AbilityName="F_WarningShot", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 // Fire a shot with your primary weapon that will make the target panic if it hits.
@@ -2121,7 +2119,7 @@ static function X2AbilityTemplate WarningShot()
 }
 
 // Open Fire
-// (AbilityName="F_OpenFire", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// (AbilityName="F_OpenFire")
 // Gain bonus Aim and Critical Chance against targets that are at full health.
 static function X2AbilityTemplate OpenFire()
 {
@@ -2138,9 +2136,6 @@ static function X2AbilityTemplate OpenFire()
     Condition = new class'X2Condition_UnitStatCheck';
     Condition.AddCheckStat(eStat_HP, 100, eCheck_Exact, 100, 100, true);
 	Effect.AbilityTargetConditions.AddItem(Condition);
-
-	// Restrict to the weapon matching this ability
-	Effect.AbilityTargetConditions.AddItem(default.MatchingWeaponCondition);
 
 	Template = Passive('F_OpenFire', "img:///UILibrary_XPerkIconPack.UIPerk_stabilize_shot_2", default.OPENFIRE_AWC, Effect);
 
@@ -2192,6 +2187,7 @@ static function X2AbilityTemplate Havoc()
 	return Template;
 }
 
+// Added to Suppression and LW2WotC_AreaSuppression in OnPostTemplatesCreated()
 static function bool HavocDamagePreview(XComGameState_Ability AbilityState, StateObjectReference TargetRef, out WeaponDamageValue MinDamagePreview, out WeaponDamageValue MaxDamagePreview, out int AllowsShield)
 {
 	local XComGameState_Ability HavocAbility;
@@ -2244,7 +2240,7 @@ static function X2AbilityTemplate ShoulderToLeanOn()
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_ShoulderToLeanOn');
 
-	Template.IconImage = "";
+	Template.IconImage = "img:///UILibrary_XPerkIconPack.UIPerk_shield_shot";
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
 	Template.Hostility = eHostility_Neutral;
@@ -2268,12 +2264,14 @@ static function X2AbilityTemplate ShoulderToLeanOn()
 
 	Template.AdditionalAbilities.AddItem('F_ShoulderToLeanOn_Passive');
 
+	Template.bCrossClassEligible = default.SHOULDERTOLEANON_AWC;
+	
 	return Template;
 }
 
 static function X2AbilityTemplate ShoulderToLeanOnPassive()
 {
-	return PurePassive('F_ShoulderToLeanOn_Passive', "", , 'eAbilitySource_Perk');
+	return PurePassive('F_ShoulderToLeanOn_Passive', "img:///UILibrary_XPerkIconPack.UIPerk_shield_shot", , 'eAbilitySource_Perk');
 }
 
 // Protect and Serve
@@ -2291,7 +2289,7 @@ static function X2AbilityTemplate ProtectAndServe()
 	Effect.PointType = class'X2CharacterTemplateManager'.default.RunAndGunActionPoint;
 
 	// Create a triggered ability that will activate whenever the unit uses an ability that meets the condition
-	Template = SelfTargetTrigger('F_ProtectAndServe', "", default.PROTECTANDSERVE_AWC, Effect, 'AbilityActivated');
+	Template = SelfTargetTrigger('F_ProtectAndServe', "img:///UILibrary_XPerkIconPack.UIPerk_defense_chevron", default.PROTECTANDSERVE_AWC, Effect, 'AbilityActivated');
 
 	// Only trigger with Shield Wall
 	NameCondition = new class'XMBCondition_AbilityName';
@@ -2306,7 +2304,7 @@ static function X2AbilityTemplate ProtectAndServe()
 // While Shield Wall is active, gain a bonus to Dodge.
 static function X2AbilityTemplate BolsteredWall()
 {
-	return PurePassive('F_BolsteredWall', "", , 'eAbilitySource_Perk');
+	return PurePassive('F_BolsteredWall', "img:///UILibrary_XPerkIconPack.UIPerk_defense_move2", , 'eAbilitySource_Perk');
 }
 
 // Added to ShieldWall in OnPostTemplatesCreated()
@@ -2321,7 +2319,7 @@ static function X2Effect_PersistentStatChange BolsteredWallEffect()
 	Effect.AddPersistentStatChange(eStat_Dodge, default.BOLSTEREDWALL_DODGE_BONUS);
 	Effect.DuplicateResponse = eDupe_Refresh;
 	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
-    Effect.SetDisplayInfo(ePerkBuff_Bonus, "Bolstered Wall", "", "", true, , 'eAbilitySource_Perk');
+    Effect.SetDisplayInfo(ePerkBuff_Bonus, default.LocBolsteredWallEffect, default.LocBolsteredWallEffectDescription, "img:///UILibrary_XPerkIconPack.UIPerk_defense_move2", true, , 'eAbilitySource_Perk');
 
     // Only apply if user has the Bolstered Wall passive
 	Condition = new class'X2Condition_AbilityProperty';
@@ -2336,7 +2334,7 @@ static function X2Effect_PersistentStatChange BolsteredWallEffect()
 // While Shield Wall is active, you cannot be critically hit
 static function X2AbilityTemplate FaultlessDefense()
 {
-	return PurePassive('F_FaultlessDefense', "", , 'eAbilitySource_Perk');
+	return PurePassive('F_FaultlessDefense', "img:///UILibrary_XPerkIconPack.UIPerk_defense_crit2", , 'eAbilitySource_Perk');
 }
 
 // Added to ShieldWall in OnPostTemplatesCreated()
@@ -2350,7 +2348,7 @@ static function X2Effect_CannotBeCrit FaultlessDefenseEffect()
 	Effect.EffectName = 'F_Faultless_CritProtection';
 	Effect.DuplicateResponse = eDupe_Refresh;
 	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
-    Effect.SetDisplayInfo(ePerkBuff_Bonus, "Faultess Defense", "", "", true, , 'eAbilitySource_Perk');
+    Effect.SetDisplayInfo(ePerkBuff_Bonus, default.LocFaultlessDefenseEffect, default.LocFaultlessDefenseEffectDescription, "img:///UILibrary_XPerkIconPack.UIPerk_defense_crit2", true, , 'eAbilitySource_Perk');
 
     // Only apply if user has the Faultless Defense passive
 	Condition = new class'X2Condition_AbilityProperty';
@@ -2376,7 +2374,7 @@ static function X2AbilityTemplate Adrenaline()
 	Effect.BuildPersistentEffect(1, true, true, false);
 	
 	// Create a triggered ability that activates whenever the unit gets a kill
-	Template = SelfTargetTrigger('F_Adrenaline', "", default.ADRENALINE_AWC, Effect, 'KillMail');
+	Template = SelfTargetTrigger('F_Adrenaline', "img:///UILibrary_XPerkIconPack.UIPerk_shield_plus", default.ADRENALINE_AWC, Effect, 'KillMail');
 
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
@@ -2388,7 +2386,7 @@ static function X2AbilityTemplate Adrenaline()
 }
 
 // Watch Them Run
-// (AbilityName="F_WatchThemRun")
+// (AbilityName="F_WatchThemRun", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 // If you have thrown or launched a grenade this turn, automatically enter overwatch at the end of the turn.
 static function X2AbilityTemplate WatchThemRun()
 {
@@ -2402,7 +2400,7 @@ static function X2AbilityTemplate WatchThemRun()
     // Effect granting an overwatch shot
 	Effect = new class'X2Effect_AddOverwatchActionPoints';
     
-	Template = SelfTargetTrigger('F_WatchThemRun', "", default.WATCHTHEMRUN_AWC, Effect, 'AbilityActivated');
+	Template = SelfTargetTrigger('F_WatchThemRun', "img:///UILibrary_XPerkIconPack.UIPerk_overwatch_grenade", default.WATCHTHEMRUN_AWC, Effect, 'AbilityActivated');
     Template.bShowActivation = true;
 
 	// Only when Throw/Launch Grenade abilities are used
@@ -2443,8 +2441,8 @@ static function X2AbilityTemplate CoverArea()
 	local X2Effect_ReduceExplosiveDamage               Effect;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_CoverArea');
-
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_solace";
+	
+	Template.IconImage = "img:///UILibrary_XPerkIconPack.UIPerk_grenade_defense2";
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
 	Template.Hostility = eHostility_Neutral;
@@ -2473,7 +2471,7 @@ static function X2AbilityTemplate CoverArea()
 
 static function X2AbilityTemplate CoverAreaPassive()
 {
-	return PurePassive('F_CoverArea_Passive', "img:///UILibrary_PerkIcons.UIPerk_solace", , 'eAbilitySource_Perk');
+	return PurePassive('F_CoverArea_Passive', "img:///UILibrary_XPerkIconPack.UIPerk_grenade_defense2", , 'eAbilitySource_Perk');
 }
 
 // Outlaw
@@ -2604,23 +2602,6 @@ static function X2AbilityTemplate ShieldTrauma()
 	return Template;
 }
 
-// Weightless
-// (AbilityName="F_Weightless")
-// Grants a Mobility bonus that offsets the penalty from equipping a Shield.
-static function X2AbilityTemplate Weightless()
-{
-	local X2Effect_PersistentStatChange			StatEffect;
-	local X2AbilityTemplate 					Template;
-
-	StatEffect = new class'X2Effect_PersistentStatChange';
-	StatEffect.AddPersistentStatChange(eStat_Mobility, default.WEIGHTLESS_MOBILITY);
-
-	Template = Passive('F_Weightless', "img:///UILibrary_LW_PerkPack.LW_AbilityExtraConditioning", false, StatEffect);;
-	Template.SetUIStatMarkup(class'XLocalizedData'.default.MobilityLabel, eStat_Mobility, default.WEIGHTLESS_MOBILITY);
-
-	return Template;
-}
-
 // Avenger
 // (AbilityName="F_Avenger", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 // When an ally within a small radius is shot at, you will automatically take a Pistol shot back at the shooter.
@@ -2630,9 +2611,9 @@ static function X2AbilityTemplate Avenger()
 	local X2AbilityTargetStyle                  TargetStyle;
 	local X2AbilityTrigger						Trigger;
 	local X2Effect_ReturnFireAOE                FireEffect;
-
+	
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Avenger');
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_returnfire";
+	Template.IconImage = "img:///UILibrary_XPerkIconPack.UIPerk_pistol_circle";
 
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
@@ -2661,7 +2642,7 @@ static function X2AbilityTemplate Avenger()
 	return Template;
 }
 
-// Avenger
+// Fire First
 // (AbilityName="F_FireFirst", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 // When an enemy attempts to shoot at you, you will pre-emptively take a Pistol shot at them.
 static function X2AbilityTemplate FireFirst()
@@ -2672,7 +2653,7 @@ static function X2AbilityTemplate FireFirst()
 	local X2Effect_ReturnFire                   FireEffect;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_FireFirst');
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_returnfire";
+	Template.IconImage = "img:///UILibrary_XPerkIconPack.UIPerk_pistol_cycle";
 
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;

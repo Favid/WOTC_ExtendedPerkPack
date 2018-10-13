@@ -221,11 +221,17 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'CALLFORFIRE_COOLDOWN':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.CALLFORFIRE_COOLDOWN);
 			return true;
+		case 'CALLFORFIRE_RADIUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.CALLFORFIRE_RADIUS);
+			return true;
 		case 'KILLEMALL_COOLDOWN':
 			OutString = string(class'X2Ability_Stolen'.default.KILLEMALL_COOLDOWN);
 			return true;
 		case 'KILLEMALL_AMMO_COST':
 			OutString = string(class'X2Ability_Stolen'.default.KILLEMALL_AMMO_COST);
+			return true;
+		case 'LOCKNLOAD_AMMO_TO_RELOAD':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.LOCKNLOAD_AMMO_TO_RELOAD);
 			return true;
 		case 'IMPOSITION_AIM_PENALTY':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.IMPOSITION_AIM_PENALTY);
@@ -365,11 +371,8 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'RALLY_SHIELD_BM':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.RALLY_SHIELD_BM);
 			return true;
-		case 'WEIGHTLESS_MOBILITY':
-			OutString = string(class'X2Ability_ExtendedPerkPack'.default.WEIGHTLESS_MOBILITY);
-			return true;
 		case 'AVENGER_RADIUS':
-			OutString = string(class'X2Ability_ExtendedPerkPack'.default.AVENGER_RADIUS);
+			OutString = string(int(Sqrt(class'X2Ability_ExtendedPerkPack'.default.AVENGER_RADIUS)));
 			return true;
 		default: 
 			return false;
