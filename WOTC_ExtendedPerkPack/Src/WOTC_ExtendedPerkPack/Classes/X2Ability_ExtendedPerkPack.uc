@@ -141,7 +141,13 @@ var config bool WATCHTHEMRUN_AWC;
 var config float COVERAREA_EXPLOSIVE_DAMAGE_REDUCTION;
 var config int COVERAREA_RADIUS;
 var config bool COVERAREA_AWC;
+var config float RALLY_RADIUS;
+var config int RALLY_CHARGES;
+var config int RALLY_SHIELD_CV;
+var config int RALLY_SHIELD_MG;
+var config int RALLY_SHIELD_BM;
 var config int WEIGHTLESS_MOBILITY;
+var config int AVENGER_RADIUS;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -200,7 +206,6 @@ static function array<X2DataTemplate> CreateTemplates()
     Templates.AddItem(AmbushShot());
     Templates.AddItem(Renewal());
     Templates.AddItem(WarningShot());
-    Templates.AddItem(VitalStrike());
     Templates.AddItem(OpenFire());
     Templates.AddItem(Havoc());
     Templates.AddItem(Finesse());
@@ -2115,61 +2120,6 @@ static function X2AbilityTemplate WarningShot()
 	return Template;
 }
 
-// Vital Strike
-// (AbilityName="F_VitalStrike", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
-// Fire a shot with your primary weapon that deals additional damage and applies Rupture.
-static function X2AbilityTemplate VitalStrike()
-{
-	local X2AbilityTemplate Template;
-	local X2Effect_ApplyWeaponDamage Effect;
-
-    // Standard damage effect that also applies Rupture
-	Effect = class'X2Ability_GrenadierAbilitySet'.static.ShredderDamageEffect();
-	Effect.EffectDamageValue.Rupture = default.VITALSTRIKE_RUPTURE;
-	
-	// Create the template using a helper function
-	Template = Attack('F_VitalStrike', "img:///UILibrary_FieldMedic.perk_vital_strike", default.VITALSTRIKE_AWC, Effect, class'UIUtilities_Tactical'.const.CLASS_LIEUTENANT_PRIORITY, eCost_WeaponConsumeAll, default.VITALSTRIKE_AMMO_COST);
-    
-    // Standard attack effects for holotarget and weapon miss damage
-    Template.AddTargetEffect(class'X2Ability_GrenadierAbilitySet'.static.HoloTargetEffect());
-	Template.AddTargetEffect(default.WeaponUpgradeMissDamage);
-
-	// Cooldown
-	AddCooldown(Template, default.VITALSTRIKE_COOLDOWN);
-
-    // Secondary ability that grants a damage bonus
-    AddSecondaryAbility(Template, VitalStrikeDamageBonus());
-
-	return Template;
-}
-
-static function X2AbilityTemplate VitalStrikeDamageBonus()
-{
-    local X2AbilityTemplate Template;
-	local XMBEffect_ConditionalBonus Effect;
-	local XMBCondition_AbilityName Condition;
-
-	// Create a conditional bonus effect
-	Effect = new class'XMBEffect_ConditionalBonus';
-	Effect.EffectName = 'F_VitalStrike_Bonuses';
-    
-	// The bonus reduces damage by a percentage
-	Effect.AddDamageModifier(default.VITALSTRIKE_DAMAGE_BONUS);
-
-	// The bonus only applies to the Vital Strike ability
-	Condition = new class'XMBCondition_AbilityName';
-	Condition.IncludeAbilityNames.AddItem('F_VitalStrike');
-	Effect.AbilityTargetConditions.AddItem(Condition);
-
-	// Create the template using a helper function
-	Template = Passive('F_VitalStrike_Damage', "img:///UILibrary_FieldMedic.perk_vital_strike", false, Effect);
-
-	// Vital Strike will show up as an active ability, so hide the icon for the passive damage effect
-	HidePerkIcon(Template);
-
-    return Template;
-}
-
 // Open Fire
 // (AbilityName="F_OpenFire", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 // Gain bonus Aim and Critical Chance against targets that are at full health.
@@ -2286,7 +2236,7 @@ static function X2AbilityTemplate Finesse()
 
 // Shoulder to Lean On
 // (AbilityName="F_ShoulderToLeanOn")
-// 
+// Allies in a small radius around you gain bonus Aim.
 static function X2AbilityTemplate ShoulderToLeanOn()
 {
 	local X2AbilityTemplate             Template;
@@ -2326,34 +2276,9 @@ static function X2AbilityTemplate ShoulderToLeanOnPassive()
 	return PurePassive('F_ShoulderToLeanOn_Passive', "", , 'eAbilitySource_Perk');
 }
 
-// Bolstered Wall
-// (AbilityName="F_BolsteredWall")
-// 
-//static function X2AbilityTemplate BolsteredWall()
-//{
-    //local XMBEffect_ConditionalBonus            Effect;
-	//local X2AbilityTemplate                     Template;
-	//local X2Condition_UnitEffectsOnSource       EffectsCondition;
-    //
-	//// Create a conditional bonus effect for a dodge bonus
-	//Effect = new class'XMBEffect_ConditionalBonus';
-	//Effect.EffectName = 'F_BolsteredWall_Bonuses';
-	//Effect.AddToHitAsTargetModifier(default.BOLSTEREDWALL_DODGE_BONUS, eHit_Graze);
-//
-	//// Require Shield Wall effect
-	//EffectsCondition = new class'X2Condition_UnitEffectsOnSource';
-	//EffectsCondition.AddRequireEffect('ShieldWall', 'AA_MissingRequiredEffect');
-	//Effect.TargetConditions.AddItem(EffectsCondition);
-    //
-	//// Create the template using a helper function
-	//Template = Passive('F_BolsteredWall', "", default.BOLSTEREDWALL_AWC, Effect);
-//
-	//return Template;
-//}
-
 // Protect and Serve
 // (AbilityName="F_ProtectAndServe")
-// 
+// Gain a non-movement action point after using Shield Wall
 static function X2AbilityTemplate ProtectAndServe()
 {
 	local X2Effect_GrantActionPoints Effect;
@@ -2378,7 +2303,7 @@ static function X2AbilityTemplate ProtectAndServe()
 
 // Bolstered Wall
 // (AbilityName="F_BolsteredWall")
-// 
+// While Shield Wall is active, gain a bonus to Dodge.
 static function X2AbilityTemplate BolsteredWall()
 {
 	return PurePassive('F_BolsteredWall', "", , 'eAbilitySource_Perk');
@@ -2436,8 +2361,8 @@ static function X2Effect_CannotBeCrit FaultlessDefenseEffect()
 }
 
 // Adrenaline
-// (AbilityName="F_Adrenaline", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
-// Kills with your primary weapon grant Shield. Passive.
+// (AbilityName="F_Adrenaline")
+// Kills grant Shield. Passive.
 static function X2AbilityTemplate Adrenaline()
 {
 	local X2AbilityTemplate Template;
@@ -2452,9 +2377,6 @@ static function X2AbilityTemplate Adrenaline()
 	
 	// Create a triggered ability that activates whenever the unit gets a kill
 	Template = SelfTargetTrigger('F_Adrenaline', "", default.ADRENALINE_AWC, Effect, 'KillMail');
-    
-	// Effect only applies to matching weapon
-	AddTriggerTargetCondition(Template, default.MatchingWeaponCondition);
 
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
@@ -2584,6 +2506,9 @@ static function X2AbilityTemplate CoverAreaPassive()
 	//return Passive('F_Outlaw', "", default.OUTLAW_AWC, Effect);
 //}
 
+// Rally
+// (AbilityName="F_Rally")
+// Grants Shield to yourself and all allies around you.
 static function X2AbilityTemplate Rally()
 {
 	local X2AbilityTemplate Template;
@@ -2608,7 +2533,7 @@ static function X2AbilityTemplate Rally()
 	Template.AbilityCosts.AddItem(ActionPointCost);
 
 	Charges = new class 'X2AbilityCharges';
-	Charges.InitialCharges = 1;
+	Charges.InitialCharges = default.RALLY_CHARGES;
 	Template.AbilityCharges = Charges;
 
 	ChargeCost = new class'X2AbilityCost_Charges';
@@ -2624,7 +2549,7 @@ static function X2AbilityTemplate Rally()
 
 	// Multi target
 	MultiTarget = new class'X2AbilityMultiTarget_Radius';
-	MultiTarget.fTargetRadius = 7; // TODO
+	MultiTarget.fTargetRadius = default.RALLY_RADIUS;
 	MultiTarget.bIgnoreBlockingCover = true;
 	Template.AbilityMultiTargetStyle = MultiTarget;
 
@@ -2643,9 +2568,9 @@ static function X2AbilityTemplate Rally()
 	// Friendlies in the radius receives a shield receives a shield
 	ShieldedEffect = new class'X2Effect_GrantShields';
 	ShieldedEffect.BuildPersistentEffect(1, true, true, false, eGameRule_PlayerTurnBegin);
-	ShieldedEffect.ConventionalAmount = 3;
-	ShieldedEffect.MagneticAmount = 5;
-	ShieldedEffect.BeamAmount = 7;
+	ShieldedEffect.ConventionalAmount = default.RALLY_SHIELD_CV;
+	ShieldedEffect.MagneticAmount = default.RALLY_SHIELD_MG;
+	ShieldedEffect.BeamAmount = default.RALLY_SHIELD_BM;
 	ShieldedEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocLongDescription, "img:///UILibrary_PerkIcons.UIPerk_adventshieldbearer_energyshield", true);
 	ShieldedEffect.VisualizationFn = EffectFlyOver_Visualization;
 
@@ -2662,6 +2587,9 @@ static function X2AbilityTemplate Rally()
 	return Template;
 }
 
+// Shield Trauma
+// (AbilityName="F_ShieldTrauma", ApplyToWeaponSlot=eInvSlot_SecondaryWeapon)
+// Upgrade to Shield Bash that stuns the target for one action in addition to disorienting them.
 static function X2AbilityTemplate ShieldTrauma()
 {
 	local X2AbilityTemplate                 Template;
@@ -2676,6 +2604,9 @@ static function X2AbilityTemplate ShieldTrauma()
 	return Template;
 }
 
+// Weightless
+// (AbilityName="F_Weightless")
+// Grants a Mobility bonus that offsets the penalty from equipping a Shield.
 static function X2AbilityTemplate Weightless()
 {
 	local X2Effect_PersistentStatChange			StatEffect;
@@ -2690,6 +2621,9 @@ static function X2AbilityTemplate Weightless()
 	return Template;
 }
 
+// Avenger
+// (AbilityName="F_Avenger", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// When an ally within a small radius is shot at, you will automatically take a Pistol shot back at the shooter.
 static function X2AbilityTemplate Avenger()
 {
 	local X2AbilityTemplate						Template;
@@ -2713,7 +2647,7 @@ static function X2AbilityTemplate Avenger()
 	Template.AbilityTriggers.AddItem(Trigger);
 
 	FireEffect = new class'X2Effect_ReturnFireAOE';
-    FireEffect.RequiredAllyRange = 4; // TODO config
+    FireEffect.RequiredAllyRange = default.AVENGER_RADIUS;
     FireEffect.bAllowSelf = false;
 	FireEffect.BuildPersistentEffect(1, true, false, false, eGameRule_PlayerTurnBegin);
 	FireEffect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage,,,Template.AbilitySourceName);
@@ -2727,6 +2661,9 @@ static function X2AbilityTemplate Avenger()
 	return Template;
 }
 
+// Avenger
+// (AbilityName="F_FireFirst", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// When an enemy attempts to shoot at you, you will pre-emptively take a Pistol shot at them.
 static function X2AbilityTemplate FireFirst()
 {
 	local X2AbilityTemplate						Template;

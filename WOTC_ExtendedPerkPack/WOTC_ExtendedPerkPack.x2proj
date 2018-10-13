@@ -49,9 +49,6 @@
     <Content Include="Content\UILibrary_FavidsPerkPack.upk">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Content\UILibrary_FieldMedic.upk">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Content\UILibrary_XPerkIconPack.upk">
       <SubType>Content</SubType>
     </Content>

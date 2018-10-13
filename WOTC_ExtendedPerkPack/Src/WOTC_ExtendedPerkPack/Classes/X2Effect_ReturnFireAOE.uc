@@ -157,7 +157,7 @@ DefaultProperties
 	DuplicateResponse = eDupe_Ignore
 	AbilityToActivate = "PistolReturnFire"
 	GrantActionPoint = "returnfire"
-	MaxPointsPerTurn = 1
+	MaxPointsPerTurn = 0
 	bPreEmptiveFire = false
 	bOnlyDuringEnemyTurn = true
 	bOnlyWhenAttackMisses = false

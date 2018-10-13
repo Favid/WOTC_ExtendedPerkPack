@@ -353,6 +353,24 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'COVERAREA_RADIUS':
 			OutString = string(int(Sqrt(class'X2Ability_ExtendedPerkPack'.default.COVERAREA_RADIUS)));
 			return true;
+		case 'RALLY_RADIUS':
+			OutString = string(int(class'X2Ability_ExtendedPerkPack'.default.RALLY_RADIUS));
+			return true;
+		case 'RALLY_SHIELD_CV':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.RALLY_SHIELD_CV);
+			return true;
+		case 'RALLY_SHIELD_MG':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.RALLY_SHIELD_MG);
+			return true;
+		case 'RALLY_SHIELD_BM':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.RALLY_SHIELD_BM);
+			return true;
+		case 'WEIGHTLESS_MOBILITY':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.WEIGHTLESS_MOBILITY);
+			return true;
+		case 'AVENGER_RADIUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.AVENGER_RADIUS);
+			return true;
 		default: 
 			return false;
 	}
