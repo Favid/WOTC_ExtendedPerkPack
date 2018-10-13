@@ -114,7 +114,7 @@ var config int RENEWAL_MAXHEALAMOUNT;
 var config int RENEWAL_RADIUS;
 var config bool RENEWAL_AWC;
 var config int WARNINGSHOT_AMMO_COST;
-var config int WARNINGSHOT_COOLDOWN;
+var config int WARNINGSHOT_CHARGES;
 var config bool WARNINGSHOT_AWC;
 var config int VITALSTRIKE_RUPTURE;
 var config int VITALSTRIKE_AMMO_COST;
@@ -146,6 +146,16 @@ var config int RALLY_SHIELD_CV;
 var config int RALLY_SHIELD_MG;
 var config int RALLY_SHIELD_BM;
 var config int AVENGER_RADIUS;
+var config int FLATLINE_RUPTURE;
+var config int FLATLINE_AMMO_COST;
+var config int FLATLINE_COOLDOWN;
+var config int FLATLINE_DAMAGE_BONUS;
+var config bool FLATLINE_AWC;
+var config bool COLDBLOODED_AWC;
+var config int PREDATOR_AIM_BONUS;
+var config int PREDATOR_CRIT_BONUS;
+var config bool PREDATOR_AWC;
+var config bool SURVIVOR_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -225,7 +235,11 @@ static function array<X2DataTemplate> CreateTemplates()
     Templates.AddItem(ShieldTrauma());
     Templates.AddItem(Avenger());
     Templates.AddItem(FireFirst());
-    
+    Templates.AddItem(Flatline());
+    Templates.AddItem(ColdBlooded());
+    Templates.AddItem(Predator());
+	Templates.AddItem(Survivor());
+
 	return Templates;
 }
 
@@ -1360,17 +1374,15 @@ static function X2AbilityTemplate AmmoConservation()
 	return Template;
 }
 
-// TODO consolidate with Pharmacist
 // Well Protected
 // (AbilityName="F_WellProtected")
 // Grants a vest only utility slot. Passive.
 static function X2AbilityTemplate WellProtected()
 {
 	// Create the template using a helper function - XComVestSlot.ini sets this perk as unlocking the vest pocket
-	return Passive('F_WellProtected', "img:///UILibrary_XPerkIconPack.UIPerk_defense_box", default.WELLPROTECTED_AWC, none);
+	return Passive('F_WellProtected', "img:///UILibrary_FavidsPerkPack.Perk_Ph_WellProtected", default.WELLPROTECTED_AWC, none);
 }
 
-// TODO consolidate with Pharmacist
 // Dedication
 // (AbilityName="F_Dedication")
 // Free action. Gain bonus mobility and ignore reaction fire for the rest of the turn. Cooldown-based.
@@ -1380,7 +1392,7 @@ static function X2AbilityTemplate Dedication()
 	local X2Effect_PersistentStatChange Effect;
 	
 	// Activated ability that targets user
-	Template = SelfTargetActivated('F_Dedication', "img:///UILibrary_FavidsPerkPack.UIPerk_Sprinter", default.DEDICATION_AWC, none, class'UIUtilities_Tactical'.const.CLASS_CORPORAL_PRIORITY, eCost_Free);
+	Template = SelfTargetActivated('F_Dedication', "img:///UILibrary_FavidsPerkPack.Perk_Ph_Dedication", default.DEDICATION_AWC, none, class'UIUtilities_Tactical'.const.CLASS_CORPORAL_PRIORITY, eCost_Free);
 	Template.bShowActivation = true;
 
 	// Create a persistent stat change effect that grants a mobility bonus - naming the effect Shadowstep lets you ignore reaction fire
@@ -1449,7 +1461,6 @@ static function X2AbilityTemplate Triage()
 	return Template;
 }
 
-// TODO consolidate with Pharmacist
 // Steadfast
 // (AbilityName="F_Steadfast")
 // Grants immunity to negative mental conditions including panic, mind control, stuns, and disorientation.
@@ -1463,7 +1474,7 @@ static function X2AbilityTemplate Steadfast()
 	Effect.ImmuneTypes.AddItem('Stun');
 	Effect.ImmuneTypes.AddItem('Unconscious');
     
-	return Passive('F_Steadfast', "img:///UILibrary_XPerkIconPack.UIPerk_mind_defense", default.STEADFAST_AWC, Effect);
+	return Passive('F_Steadfast', "img:///UILibrary_FavidsPerkPack.Perk_Ph_Steadfast", default.STEADFAST_AWC, Effect);
 }
 
 // Corpsman
@@ -1504,45 +1515,64 @@ static function X2AbilityTemplate FieldMedic()
 	return Template;
 }
 
-// TODO consolidate with Pharmacist
 // Stimulate
 // (AbilityName="F_Stimulate")
 // Once per turn, you may remove mental impairments from a nearby ally.
 static function X2AbilityTemplate Stimulate()
 {
-	local X2AbilityTemplate                 Template;
-	local X2AbilityTarget_SingleInRange     SingleTarget;
-	local X2Effect_RemoveEffects			RemoveEffects;
+	local X2AbilityTemplate                     Template;
+	local X2Effect_RemoveEffectsByDamageType	RemoveEffects;
+    local X2Condition_UnitProperty              TargetCondition;
+    local X2Condition_UnitStatCheck             UnitStatCheckCondition;
 
 	// Removes most mental effects
-	RemoveEffects = new class'X2Effect_RemoveEffects';
+	RemoveEffects = new class'X2Effect_RemoveEffectsByDamageType';
 	RemoveEffects.EffectNamesToRemove.AddItem(class'X2AbilityTemplateManager'.default.DisorientedName);
 	RemoveEffects.EffectNamesToRemove.AddItem(class'X2AbilityTemplateManager'.default.PanickedName);
-	RemoveEffects.EffectNamesToRemove.AddItem(class'X2AbilityTemplateManager'.default.StunnedName);
 	RemoveEffects.EffectNamesToRemove.AddItem(class'X2StatusEffects'.default.UnconsciousName);
 
 	// Create template using a helper function
-	Template = TargetedBuff('F_Stimulate', "img:///UILibrary_XPerkIconPack.UIPerk_stim_box", false, RemoveEffects, class'UIUtilities_Tactical'.const.MEDIKIT_HEAL_PRIORITY + 1, eCost_Single);
+	Template = TargetedBuff('F_Stimulate', "img:///UILibrary_FavidsPerkPack.Perk_Ph_Stimulate", false, RemoveEffects, class'UIUtilities_Tactical'.const.MEDIKIT_HEAL_PRIORITY + 1, eCost_Single);
+    
+    // TargetedBuff() adds a condition that the target must be living; we need to remove that because Unconscious targets are not considered to be living
+    Template.AbilityTargetConditions.Length = 0;
+
+    // Restore action points to a stunned target
+	Template.AddTargetEffect(new class'X2Effect_RestoreActionPoints'); 
 
 	// Once per turn
 	AddCooldown(Template, 1);
 
-	// Limited range
-	SingleTarget = new class'X2AbilityTarget_SingleInRange';
-	SingleTarget.RangeInTiles = default.STIMULATE_RANGE_IN_TILES;
-	SingleTarget.bShowAOE = true;
-	Template.AbilityTargetStyle = SingleTarget;
-
-	// Template must be suffering from a mental impairment
+	// Target must be suffering from a mental impairment
 	Template.AbilityTargetConditions.AddItem(new class'X2Condition_RevivalProtocol');
+    
+    // Target must be within range and friendly
+	TargetCondition = new class'X2Condition_UnitProperty';
+	TargetCondition.ExcludeHostileToSource = true;
+	TargetCondition.ExcludeFriendlyToSource = false;
+	TargetCondition.RequireSquadmates = true;
+	TargetCondition.ExcludeDead = false; //See comment below...
+	TargetCondition.RequireWithinRange = true;
+	TargetCondition.WithinRange = 144;
+	Template.AbilityTargetConditions.AddItem(TargetCondition);
+
+	// Hack: Do this instead of ExcludeDead, to only exclude properly-dead or bleeding-out units.
+	UnitStatCheckCondition = new class'X2Condition_UnitStatCheck';
+	UnitStatCheckCondition.AddCheckStat(eStat_HP, 0, eCheck_GreaterThan);
+	Template.AbilityTargetConditions.AddItem(UnitStatCheckCondition);
+    
+    // Target must be visible
+	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
 
 	Template.bLimitTargetIcons = true;
 	Template.ActivationSpeech = 'StabilizingAlly';
+    
+	Template.CustomFireAnim = 'HL_Revive';
+	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
 
 	return Template;
 }
 
-// TODO consolidate with Pharmacist
 // Bloodlet
 // (AbilityName="F_Bloodlet")
 // Standard shots from your primary weapon or a pistol now cause bleeding.
@@ -1551,7 +1581,7 @@ static function X2AbilityTemplate Bloodlet()
 	local X2AbilityTemplate Template;
 
 	// Start with the passive template
-	Template = Passive('F_Bloodlet', "img:///UILibrary_XPerkIconPack.UIPerk_shot_adrenaline", default.BLOODLET_AWC, none);
+	Template = Passive('F_Bloodlet', "img:///UILibrary_FavidsPerkPack.Perk_Ph_Bloodlet", default.BLOODLET_AWC, none);
 	
 	return Template;
 }
@@ -2095,25 +2125,26 @@ static function X2AbilityTemplate Renewal()
 	return Template;
 }
 
-// TODO consolidate with Pharmacist
 // Warning Shot
 // (AbilityName="F_WarningShot", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
-// Fire a shot with your primary weapon that will make the target panic if it hits.
+// Fire your primary weapon just over the target's head, causing them to panic. This attack deals no damage.
 static function X2AbilityTemplate WarningShot()
 {
 	local X2AbilityTemplate Template;
 	local X2Effect_Panicked Effect;
-	
-	// Create the template using a helper function
-	Template = Attack('F_WarningShot', "img:///UILibrary_XPerkIconPack.UIPerk_panic_shot", default.WARNINGSHOT_AWC, none, class'UIUtilities_Tactical'.const.CLASS_LIEUTENANT_PRIORITY, eCost_WeaponConsumeAll, default.WARNINGSHOT_AMMO_COST);
-    
-	// Cooldown
-	AddCooldown(Template, default.WARNINGSHOT_COOLDOWN);
 
 	// Effect
 	Effect = new class'X2Effect_Panicked';
 	Effect = class'X2StatusEffects'.static.CreatePanickedStatusEffect();
-	Template.AddTargetEffect(Effect);
+	
+	// Create the template using a helper function
+	Template = Attack('F_WarningShot', "img:///UILibrary_FavidsPerkPack.Perk_Ph_WarningShot", default.WARNINGSHOT_AWC, Effect, class'UIUtilities_Tactical'.const.CLASS_LIEUTENANT_PRIORITY, eCost_WeaponConsumeAll, default.WARNINGSHOT_AMMO_COST);
+    
+	// 100% chance to hit
+	Template.AbilityToHitCalc = default.DeadEye;
+
+	// Charges
+	AddCharges(Template, default.WARNINGSHOT_CHARGES);
 
 	return Template;
 }
@@ -2679,4 +2710,132 @@ static function X2AbilityTemplate FireFirst()
 	Template.bCrossClassEligible = false;       //  this can only work with pistols, which only sharpshooters have
 
 	return Template;
+}
+
+// Flatline
+// (AbilityName="F_Flatline", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// Fire a shot with your primary weapon that deals additional damage and applies Rupture.
+static function X2AbilityTemplate Flatline()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_ApplyWeaponDamage Effect;
+
+    // Standard damage effect that also applies Rupture
+	Effect = class'X2Ability_GrenadierAbilitySet'.static.ShredderDamageEffect();
+	Effect.EffectDamageValue.Rupture = default.FLATLINE_RUPTURE;
+	
+	// Create the template using a helper function
+	Template = Attack('F_Flatline', "img:///UILibrary_FavidsPerkPack.Perk_Ph_Flatline", default.FLATLINE_AWC, Effect, class'UIUtilities_Tactical'.const.CLASS_LIEUTENANT_PRIORITY, eCost_WeaponConsumeAll, default.FLATLINE_AMMO_COST);
+    
+    // Standard attack effects for holotarget and weapon miss damage
+    Template.AddTargetEffect(class'X2Ability_GrenadierAbilitySet'.static.HoloTargetEffect());
+	Template.AddTargetEffect(default.WeaponUpgradeMissDamage);
+
+	// Cooldown
+	AddCooldown(Template, default.FLATLINE_COOLDOWN);
+
+    // Secondary ability that grants a damage bonus
+    AddSecondaryAbility(Template, FlatlineDamageBonus());
+
+	return Template;
+}
+
+static function X2AbilityTemplate FlatlineDamageBonus()
+{
+    local X2AbilityTemplate Template;
+	local XMBEffect_ConditionalBonus Effect;
+	local XMBCondition_AbilityName Condition;
+
+	// Create a conditional bonus effect
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.EffectName = 'F_Flatline_Bonuses';
+    
+	// The bonus reduces damage by a percentage
+	Effect.AddDamageModifier(default.FLATLINE_DAMAGE_BONUS);
+
+	// The bonus only applies to the Vital Strike ability
+	Condition = new class'XMBCondition_AbilityName';
+	Condition.IncludeAbilityNames.AddItem('F_Flatline');
+	Effect.AbilityTargetConditions.AddItem(Condition);
+
+	// Create the template using a helper function
+	Template = Passive('F_Flatline_Damage', "img:///UILibrary_FavidsPerkPack.Perk_Ph_Flatline", false, Effect);
+
+	// Flatline will show up as an active ability, so hide the icon for the passive damage effect
+	HidePerkIcon(Template);
+
+    return Template;
+}
+
+// Cold Blooded
+// (AbilityName="F_ColdBlooded"
+// The first standard shot you take against an enemy suffering from bleeding, poison, burning, or acid burning does not cost an action.
+static function X2AbilityTemplate ColdBlooded()
+{
+    local XMBEffect_AbilityCostRefund               Effect;
+	local XMBCondition_AbilityName                  AbilityNameCondition;
+    local X2Condition_UnitAffectedByPhysicalEffect  StatusEffectCondition;
+	
+	// Create an effect that will refund the cost of attacks
+	Effect = new class'XMBEffect_AbilityCostRefund';
+	Effect.EffectName = 'F_ColdBlooded_Refund';
+	Effect.TriggeredEvent = 'F_ColdBlooded_Refund';
+	Effect.CountValueName = 'F_ColdBlooded_RefundCounter';
+	Effect.MaxRefundsPerTurn = 1;
+
+	// The refund only applies to standard shots
+	AbilityNameCondition = new class'XMBCondition_AbilityName';
+	AbilityNameCondition.IncludeAbilityNames.AddItem('StandardShot');
+	Effect.AbilityTargetConditions.AddItem(AbilityNameCondition);
+
+    // Target must suffer from a physical status effect
+    StatusEffectCondition = new class'X2Condition_UnitAffectedByPhysicalEffect';
+	Effect.AbilityTargetConditions.AddItem(StatusEffectCondition);
+
+	// Create the template using a helper function
+	return Passive('F_ColdBlooded', "img:///UILibrary_FavidsPerkPack.Perk_Ph_ColdBlooded", default.COLDBLOODED_AWC, Effect);
+}
+
+// Predator
+// (AbilityName="F_Predator")
+// Grants an aim bonus on enemies that are flanked or out of cover. Passive.
+static function X2AbilityTemplate Predator()
+{
+	local XMBEffect_ConditionalBonus Effect;
+
+	// Create a conditional bonus
+	Effect = new class'XMBEffect_ConditionalBonus';
+
+	// The bonus adds the aim and crit chance
+	Effect.AddToHitModifier(default.PREDATOR_AIM_BONUS, eHit_Success);
+	Effect.AddToHitModifier(default.PREDATOR_CRIT_BONUS, eHit_Crit);
+
+	// The bonus only applies while flanking
+	Effect.AbilityTargetConditions.AddItem(default.FlankedCondition);
+
+	// Create the template using a helper function
+	return Passive('F_Predator', "img:///UILibrary_FavidsPerkPack.Perk_Ph_Predator", default.PREDATOR_AWC, Effect);
+}
+
+// Survivor
+// (AbilityName="F_Survivor")
+// Ensures the first killing blow in a mission will not lead to instant death. Also reduces this soldier's wound recovery time.
+static function X2AbilityTemplate Survivor()
+{
+	local X2AbilityTemplate                     Template;
+	local X2Effect_GuaranteeBleedout GuaranteeBleedoutEffect;
+	local X2Effect_ReduceSelfWoundTime ReduceSelfWoundTimeEffect;
+
+	// Create the template using a helper function
+	Template = Passive('F_Survivor', "img:///UILibrary_FavidsPerkPack.Perk_Ph_WellProtected", default.SURVIVOR_AWC, none);
+
+	GuaranteeBleedoutEffect = new class'X2Effect_GuaranteeBleedout';
+	GuaranteeBleedoutEffect.BuildPersistentEffect(1, true, false, false);
+    Template.AddTargetEffect(GuaranteeBleedoutEffect);
+
+	ReduceSelfWoundTimeEffect = new class'X2Effect_ReduceSelfWoundTime';
+	ReduceSelfWoundTimeEffect.BuildPersistentEffect(1, true, false, false);
+    Template.AddTargetEffect(ReduceSelfWoundTimeEffect);
+
+    return Template;
 }

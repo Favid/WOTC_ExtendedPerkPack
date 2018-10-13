@@ -119,6 +119,9 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_GrantShields.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_GuaranteeBleedout.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_Immobilize.uc">
       <SubType>Content</SubType>
     </Content>
@@ -135,6 +138,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ReduceExplosiveDamage.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ReduceSelfWoundTime.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_RefundAmmoCost.uc">

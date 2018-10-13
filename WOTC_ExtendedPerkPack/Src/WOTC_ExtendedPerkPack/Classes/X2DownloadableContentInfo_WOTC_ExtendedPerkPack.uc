@@ -332,8 +332,8 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'RENEWAL_RADIUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.RENEWAL_RADIUS);
 			return true;
-		case 'WARNINGSHOT_COOLDOWN':
-			OutString = string(class'X2Ability_ExtendedPerkPack'.default.WARNINGSHOT_COOLDOWN);
+		case 'WARNINGSHOT_CHARGES':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.WARNINGSHOT_CHARGES);
 			return true;
 		case 'VITALSTRIKE_DAMAGE_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.VITALSTRIKE_DAMAGE_BONUS);
@@ -373,6 +373,18 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		case 'AVENGER_RADIUS':
 			OutString = string(int(Sqrt(class'X2Ability_ExtendedPerkPack'.default.AVENGER_RADIUS)));
+			return true;
+		case 'FLATLINE_DAMAGE_BONUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.FLATLINE_DAMAGE_BONUS);
+			return true;
+		case 'FLATLINE_COOLDOWN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.FLATLINE_COOLDOWN);
+			return true;
+		case 'PREDATOR_AIM_BONUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PREDATOR_AIM_BONUS);
+			return true;
+		case 'PREDATOR_CRIT_BONUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PREDATOR_CRIT_BONUS);
 			return true;
 		default: 
 			return false;
