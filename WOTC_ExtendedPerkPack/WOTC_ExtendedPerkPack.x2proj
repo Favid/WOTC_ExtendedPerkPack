@@ -31,7 +31,7 @@
     <Content Include="Config\XComClassData_Test.ini">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Config\XComClassData.ini">
+    <Content Include="Config\XComClassData_latest.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComExtendedPerkPack.ini">

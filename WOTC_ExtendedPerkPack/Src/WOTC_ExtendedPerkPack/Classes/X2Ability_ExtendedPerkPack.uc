@@ -124,6 +124,7 @@ var config bool VITALSTRIKE_AWC;
 var config int OPENFIRE_AIM;
 var config int OPENFIRE_CRIT;
 var config bool OPENFIRE_AWC;
+var config int HAVOC_DAMAGE;
 var config bool HAVOC_AWC;
 var config bool FINESSE_AWC;
 var config int SHOULDERTOLEANON_RADIUS;
@@ -2184,7 +2185,7 @@ static function X2AbilityTemplate Havoc()
 	local XMBCondition_AbilityName NameCondition;
 	local WeaponDamageValue DamageValue;
 
-    DamageValue.Damage = 1;
+    DamageValue.Damage = default.HAVOC_DAMAGE;
 
 	Effect = class'X2Ability_GrenadierAbilitySet'.static.ShredderDamageEffect();
 	Effect.bIgnoreBaseDamage = true;

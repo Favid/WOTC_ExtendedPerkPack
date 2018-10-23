@@ -386,7 +386,10 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'PREDATOR_CRIT_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PREDATOR_CRIT_BONUS);
 			return true;
-		default: 
+		case 'HAVOC_DAMAGE':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.HAVOC_DAMAGE);
+			return true;
+		default:
 			return false;
 	}
 }
