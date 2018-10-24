@@ -25,15 +25,6 @@
     <Folder Include="Src\XModBase_Interfaces\Classes" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Config\XComClassData_egt.ini">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Config\XComClassData_Test.ini">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Config\XComClassData_latest.ini">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Config\XComExtendedPerkPack.ini">
       <SubType>Content</SubType>
     </Content>
@@ -41,9 +32,6 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComVestSlot.ini">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Content\Favid_Perks.upk">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Content\UILibrary_FavidsPerkPack.upk">
