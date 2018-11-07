@@ -2423,7 +2423,7 @@ static function X2AbilityTemplate Adrenaline()
 static function X2AbilityTemplate WatchThemRun()
 {
 	local X2AbilityTemplate                 Template;
-	local X2Condition_AbilitySourceWeapon   AmmoCondition;
+	local X2Condition_PrimaryWeapon   AmmoCondition;
 	local XMBCondition_AbilityName   NameCondition;
     local X2Effect_AddOverwatchActionPoints   Effect;
     local X2Condition_UnitValue ValueCondition;
@@ -2442,7 +2442,7 @@ static function X2AbilityTemplate WatchThemRun()
 	AddTriggerTargetCondition(Template, NameCondition);
 
     // Require that the user has ammo left
-	AmmoCondition = new class'X2Condition_AbilitySourceWeapon';
+	AmmoCondition = new class'X2Condition_PrimaryWeapon';
 	AmmoCondition.AddAmmoCheck(0, eCheck_GreaterThan);
 	AddTriggerTargetCondition(Template, AmmoCondition);
     
