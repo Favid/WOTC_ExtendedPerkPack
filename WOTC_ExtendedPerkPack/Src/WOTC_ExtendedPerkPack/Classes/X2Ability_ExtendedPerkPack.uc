@@ -18,6 +18,7 @@ var config int MAIM_AMMO_COST;
 var config int MAIM_COOLDOWN;
 var config int MAIM_DURATION;
 var config bool MAIM_AWC;
+var config array<name> QUICKPATCH_ABILITIES;
 var config bool QUICKPATCH_AWC;
 var config int PRESERVATION_DEFENSE_BONUS;
 var config int PRESERVATION_DURATION;
@@ -552,10 +553,7 @@ static function X2AbilityTemplate QuickPatch()
 
 	// The bonus only applies to medikit abilities
 	AbilityNameCondition = new class'XMBCondition_AbilityName';
-	AbilityNameCondition.IncludeAbilityNames.AddItem('MedikitHeal');
-	AbilityNameCondition.IncludeAbilityNames.AddItem('NanoMedikitHeal');
-	AbilityNameCondition.IncludeAbilityNames.AddItem('MedikitStabilize');
-	AbilityNameCondition.IncludeAbilityNames.AddItem('Sedate');
+	AbilityNameCondition.IncludeAbilityNames = default.QUICKPATCH_ABILITIES;
 	Effect.AbilityTargetConditions.AddItem(AbilityNameCondition);
 
 	// Create the template using a helper function
@@ -608,6 +606,7 @@ static function X2AbilityTemplate LickYourWounds()
 	// Only trigger with Hunker Down
 	NameCondition = new class'XMBCondition_AbilityName';
 	NameCondition.IncludeAbilityNames.AddItem('HunkerDown');
+	NameCondition.IncludeAbilityNames.AddItem('ShieldWall');
 	AddTriggerTargetCondition(Template, NameCondition);
 
 	// Restore health effect
@@ -947,6 +946,7 @@ static function X2AbilityTemplate TrenchWarfareActivator()
 {
     local X2Effect_GrantActionPoints ActionPointEffect;
 	local X2Effect_ImmediateAbilityActivation HunkerDownEffect;
+	local X2Effect_ImmediateAbilityActivation ShieldWallEffect;
 	local X2AbilityTemplate Template;
 	local X2Condition_UnitEffects EffectsCondition;
 	local X2Condition_UnitValue ValueCondition;
@@ -977,6 +977,13 @@ static function X2AbilityTemplate TrenchWarfareActivator()
 	HunkerDownEffect.AbilityName = 'HunkerDown';
 	HunkerDownEffect.BuildPersistentEffect(1, false, true, , eGameRule_PlayerTurnBegin);
 	AddSecondaryEffect(Template, HunkerDownEffect);
+
+	// Activate the Shield Wall Ability
+	ShieldWallEffect = new class'X2Effect_ImmediateAbilityActivation';
+	ShieldWallEffect.EffectName = 'ImmediateShieldWall';
+	ShieldWallEffect.AbilityName = 'ShieldWall';
+	ShieldWallEffect.BuildPersistentEffect(1, false, true, , eGameRule_PlayerTurnBegin);
+	AddSecondaryEffect(Template, ShieldWallEffect);
 
 	return Template;
 }
