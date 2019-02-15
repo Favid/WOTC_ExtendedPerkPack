@@ -51,6 +51,9 @@ static event OnPostTemplatesCreated()
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenade');
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenadeMk2');
 
+    PatchSmokeGrenadeForRegenerativeMist('SmokeGrenade');
+    PatchSmokeGrenadeForRegenerativeMist('SmokeGrenadeMk2');
+
 }
 
 static function PatchAbilityForImposition(name AbilityName)
@@ -139,6 +142,23 @@ private static function PatchSmokeGrenadeForCombatDrugs(name ItemName)
 		GrenadeTemplate = X2GrenadeTemplate(Template);
 		GrenadeTemplate.ThrownGrenadeEffects.AddItem(class'X2Ability_ExtendedPerkPack'.static.CombatDrugsEffect());
 		GrenadeTemplate.LaunchedGrenadeEffects.AddItem(class'X2Ability_ExtendedPerkPack'.static.CombatDrugsEffect());
+	}
+}
+
+private static function PatchSmokeGrenadeForRegenerativeMist(name ItemName)
+{
+	local X2ItemTemplateManager		ItemManager;
+	local array<X2DataTemplate>		TemplateAllDifficulties;
+	local X2DataTemplate			Template;
+	local X2GrenadeTemplate			GrenadeTemplate;
+
+	ItemManager = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+	ItemManager.FindDataTemplateAllDifficulties(ItemName, TemplateAllDifficulties);
+	foreach TemplateAllDifficulties(Template)
+	{
+		GrenadeTemplate = X2GrenadeTemplate(Template);
+		GrenadeTemplate.ThrownGrenadeEffects.AddItem(class'X2Ability_ExtendedPerkPack'.static.RegenerativeMistEffect());
+		GrenadeTemplate.LaunchedGrenadeEffects.AddItem(class'X2Ability_ExtendedPerkPack'.static.RegenerativeMistEffect());
 	}
 }
 

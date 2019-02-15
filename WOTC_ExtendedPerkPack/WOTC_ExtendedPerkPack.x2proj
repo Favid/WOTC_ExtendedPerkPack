@@ -149,6 +149,9 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ScaledConditionalStatChange.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_SmokeRegeneration.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_SmokeToHitModifiers.uc">
       <SubType>Content</SubType>
     </Content>

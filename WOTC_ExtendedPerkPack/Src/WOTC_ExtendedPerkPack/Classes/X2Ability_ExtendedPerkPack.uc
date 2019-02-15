@@ -158,6 +158,9 @@ var config int PREDATOR_AIM_BONUS;
 var config int PREDATOR_CRIT_BONUS;
 var config bool PREDATOR_AWC;
 var config bool SURVIVOR_AWC;
+var config int REGENERATIVEMIST_HEAL_PER_TURN;
+var config int REGENERATIVEMIST_MAX_HEAL_AMOUNT;
+var config bool REGENERATIVEMIST_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -167,6 +170,9 @@ var localized string LocBolsteredWallEffectDescription;
 
 var localized string LocFaultlessDefenseEffect;
 var localized string LocFaultlessDefenseEffectDescription;
+
+var localized string LocRegenerativeMistEffect;
+var localized string LocRegenerativeMistEffectDescription;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -241,6 +247,7 @@ static function array<X2DataTemplate> CreateTemplates()
     Templates.AddItem(ColdBlooded());
     Templates.AddItem(Predator());
 	Templates.AddItem(Survivor());
+	Templates.AddItem(RegenerativeMist());
 
 	return Templates;
 }
@@ -2846,4 +2853,35 @@ static function X2AbilityTemplate Survivor()
     Template.AddTargetEffect(ReduceSelfWoundTimeEffect);
 
     return Template;
+}
+
+// Regenerative Mist
+// (AbilityName="F_RegenerativeMist")
+// Your smoke grenades grant a health restoration effect to all targets in the smoke cloud
+static function X2AbilityTemplate RegenerativeMist()
+{
+	return Passive('F_RegenerativeMist', "img:///UILibrary_XPerkIconPack.UIPerk_smoke_medkit", default.REGENERATIVEMIST_AWC, none);
+}
+
+// Added to SmokeGrenade and SmokeBomb in OnPostTemplatesCreated()
+static function X2Effect RegenerativeMistEffect()
+{
+	local X2Effect_SmokeRegeneration Effect;
+	local XMBCondition_SourceAbilities Condition;
+
+	// Health regen in smoke
+	Effect = new class'X2Effect_SmokeRegeneration';
+	Effect.BuildPersistentEffect(class'X2Effect_ApplySmokeGrenadeToWorld'.default.Duration + 1, false, false, false, eGameRule_PlayerTurnBegin);
+	Effect.SetDisplayInfo(ePerkBuff_Bonus, default.LocRegenerativeMistEffect, default.LocRegenerativeMistEffectDescription, "img:///UILibrary_XPerkIconPack.UIPerk_smoke_medkit");
+	Effect.HealAmount = default.REGENERATIVEMIST_HEAL_PER_TURN;
+	Effect.MaxHealAmount = default.REGENERATIVEMIST_MAX_HEAL_AMOUNT;
+	Effect.HealthRegeneratedName = 'F_RegenerativeMist_Healing';
+	Effect.DuplicateResponse = eDupe_Refresh;
+
+	// Only applies if the thrower has Regenerative Mist
+	Condition = new class'XMBCondition_SourceAbilities';
+	Condition.AddRequireAbility('F_RegenerativeMist', 'AA_UnitIsImmune');
+	Effect.TargetConditions.AddItem(Condition);
+
+	return Effect;
 }
