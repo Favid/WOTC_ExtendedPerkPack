@@ -457,7 +457,6 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 		//  Now check for critical chances.
 		if (bAllowCrit)
 		{
-            `LOG("=== Yes Crit");
 			AddModifier(UnitState.GetBaseStat(eStat_CritChance), class'XLocalizedData'.default.CharCritChance, m_ShotBreakdown, eHit_Crit, bDebugLog);
 			UnitState.GetStatModifiers(eStat_CritChance, StatMods, StatModValues);
 			for (i = 0; i < StatMods.Length; ++i)
@@ -485,10 +484,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 				}
 			}
 		}
-        else
-        {
-            `LOG("=== No Crit");
-        }
+
 		foreach UnitState.AffectedByEffects(EffectRef)
 		{
 			EffectModifiers.Length = 0;
