@@ -8,8 +8,10 @@ function bool RegenerationTicked(X2Effect_Persistent PersistentEffect, const out
 
     if (TargetState.IsInWorldEffectTile(class'X2Effect_ApplySmokeGrenadeToWorld'.default.Class.Name))
 	{
-		super.RegenerationTicked(PersistentEffect, ApplyEffectParameters, kNewEffectState, NewGameState, FirstApplication);
+		return super.RegenerationTicked(PersistentEffect, ApplyEffectParameters, kNewEffectState, NewGameState, FirstApplication);
 	}
+
+	return false;
 }
 
 function bool IsEffectCurrentlyRelevant(XComGameState_Effect EffectGameState, XComGameState_Unit TargetUnit)

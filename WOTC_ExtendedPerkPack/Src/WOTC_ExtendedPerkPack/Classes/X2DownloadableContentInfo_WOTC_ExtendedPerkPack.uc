@@ -444,6 +444,12 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'STILETTO_ARMOR_PIERCING':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.STILETTO_ARMOR_PIERCING);
 			return true;
+		case 'ADRENALINE_SHIELD':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.ADRENALINE_SHIELD);
+			return true;
+		case 'ADRENALINE_ACTIVATIONS_PER_MISSION':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.ADRENALINE_ACTIVATIONS_PER_MISSION);
+			return true;
 		default:
 			return false;
 	}

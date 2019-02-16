@@ -70,8 +70,9 @@ var config bool RESUPPLY_AWC;
 var config int IMMUNIZE_CHARGES;
 var config bool IMMUNIZE_AWC;
 var config bool RUSH_AWC;
-var config bool AMMOCONSERVATION_AWC;
 var config int AMMOCONSERVATION_COOLDOWN;
+var config bool AMMOCONSERVATION_APPLIES_TO_SECONDARIES;
+var config bool AMMOCONSERVATION_AWC;
 var config bool WELLPROTECTED_AWC;
 var config int DEDICATION_MOBILITY;
 var config int DEDICATION_COOLDOWN;
@@ -138,6 +139,7 @@ var config bool BOLSTEREDWALL_AWC;
 var config bool PROTECTANDSERVE_AWC;
 var config bool FAULTLESSDEFENSE_AWC;
 var config int ADRENALINE_SHIELD;
+var config int ADRENALINE_ACTIVATIONS_PER_MISSION;
 var config bool ADRENALINE_AWC;
 var config int WATCHTHEMRUN_ACTIVATIONS_PER_TURN;
 var config bool WATCHTHEMRUN_AWC;
@@ -1385,6 +1387,7 @@ static function X2AbilityTemplate AmmoConservation()
     // Handles the ammo cost refund
 	Effect = new class'X2Effect_RefundAmmoCost';
 	Effect.EffectName = 'F_AmmoConservation';
+	Effect.bAppliesToSecondaries = default.AMMOCONSERVATION_APPLIES_TO_SECONDARIES;
 	Effect.DuplicateResponse = eDupe_Ignore;
 	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
 
@@ -2421,6 +2424,9 @@ static function X2AbilityTemplate Adrenaline()
 {
 	local X2AbilityTemplate Template;
 	local X2Effect_PersistentStatChange Effect;
+	local X2Condition_UnitType UnitTypeCondition;
+	local X2Condition_UnitValue ValueCondition;
+	local X2Effect_IncrementUnitValue IncrementEffect;
     
 	// Create a persistent stat change effect that grants a mobility bonus
 	Effect = new class'X2Effect_PersistentStatChange';
@@ -2428,9 +2434,26 @@ static function X2AbilityTemplate Adrenaline()
 	Effect.AddPersistentStatChange(eStat_ShieldHP, default.ADRENALINE_SHIELD);
 	Effect.DuplicateResponse = eDupe_Allow;
 	Effect.BuildPersistentEffect(1, true, true, false);
-	
+
 	// Create a triggered ability that activates whenever the unit gets a kill
 	Template = SelfTargetTrigger('F_Adrenaline', "img:///UILibrary_XPerkIconPack.UIPerk_shield_plus", default.ADRENALINE_AWC, Effect, 'KillMail');
+
+	// Does not trigger when killing Lost
+	UnitTypeCondition = new class'X2Condition_UnitType';
+	UnitTypeCondition.ExcludeTypes.AddItem('TheLost');
+	AddTriggerTargetCondition(Template, UnitTypeCondition);
+    
+	// Limit activations
+	ValueCondition = new class'X2Condition_UnitValue';
+	ValueCondition.AddCheckValue('F_Adrenaline_Activations', default.ADRENALINE_ACTIVATIONS_PER_MISSION, eCheck_LessThan);
+	Template.AbilityTargetConditions.AddItem(ValueCondition);
+
+    // Create an effect that will increment the unit value
+	IncrementEffect = new class'X2Effect_IncrementUnitValue';
+	IncrementEffect.UnitName = 'F_Adrenaline_Activations';
+	IncrementEffect.NewValueToSet = 1; // This means increment by one -- stupid property name
+	IncrementEffect.CleanupType = eCleanup_BeginTactical;
+    Template.AddTargetEffect(IncrementEffect);
 
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
