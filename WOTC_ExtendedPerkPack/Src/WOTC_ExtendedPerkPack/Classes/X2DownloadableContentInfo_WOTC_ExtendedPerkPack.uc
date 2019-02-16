@@ -432,6 +432,9 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'HAVOC_DAMAGE':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.HAVOC_DAMAGE);
 			return true;
+		case 'REGENERATIVEMIST_HEAL_PER_TURN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.REGENERATIVEMIST_HEAL_PER_TURN);
+			return true;
 		default:
 			return false;
 	}
