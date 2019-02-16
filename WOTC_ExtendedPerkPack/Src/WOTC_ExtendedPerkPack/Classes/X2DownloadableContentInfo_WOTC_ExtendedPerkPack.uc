@@ -429,8 +429,14 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'PREDATOR_CRIT_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PREDATOR_CRIT_BONUS);
 			return true;
-		case 'HAVOC_DAMAGE':
-			OutString = string(class'X2Ability_ExtendedPerkPack'.default.HAVOC_DAMAGE);
+		case 'HAVOC_DAMAGE_CV':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.HAVOC_DAMAGE_CV);
+			return true;
+		case 'HAVOC_DAMAGE_MG':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.HAVOC_DAMAGE_MG);
+			return true;
+		case 'HAVOC_DAMAGE_BM':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.HAVOC_DAMAGE_BM);
 			return true;
 		case 'REGENERATIVEMIST_HEAL_PER_TURN':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.REGENERATIVEMIST_HEAL_PER_TURN);

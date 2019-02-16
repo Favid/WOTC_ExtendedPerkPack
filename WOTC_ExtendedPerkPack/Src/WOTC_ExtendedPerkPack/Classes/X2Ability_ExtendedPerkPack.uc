@@ -125,7 +125,9 @@ var config bool VITALSTRIKE_AWC;
 var config int OPENFIRE_AIM;
 var config int OPENFIRE_CRIT;
 var config bool OPENFIRE_AWC;
-var config int HAVOC_DAMAGE;
+var config int HAVOC_DAMAGE_CV;
+var config int HAVOC_DAMAGE_MG;
+var config int HAVOC_DAMAGE_BM;
 var config bool HAVOC_AWC;
 var config bool FINESSE_AWC;
 var config int SHOULDERTOLEANON_RADIUS;
@@ -2199,16 +2201,19 @@ static function X2AbilityTemplate OpenFire()
 static function X2AbilityTemplate Havoc()
 {
 	local X2AbilityTemplate Template;
-	local X2Effect_ApplyWeaponDamage Effect;
+	local X2Effect_SuppressionDamage Effect;
 	local XMBAbilityTrigger_EventListener EventListener;
 	local XMBCondition_AbilityName NameCondition;
 	local WeaponDamageValue DamageValue;
 
-    DamageValue.Damage = default.HAVOC_DAMAGE;
+	// Base damage of 0 - X2Effect_SuppressionDamage will add damage for the weapon tier used
+    DamageValue.Damage = 0;
 
-	Effect = class'X2Ability_GrenadierAbilitySet'.static.ShredderDamageEffect();
-	Effect.bIgnoreBaseDamage = true;
+	Effect = new class'X2Effect_SuppressionDamage';
     Effect.EffectDamageValue = DamageValue;
+	Effect.ConventionalDamage = default.HAVOC_DAMAGE_CV;
+	Effect.MagneticDamage = default.HAVOC_DAMAGE_MG;
+	Effect.BeamDamage = default.HAVOC_DAMAGE_BM;
 
 	Template = TargetedDebuff('F_Havoc', "img:///UILibrary_FavidsPerkPack.UIPerk_Mayhem", default.HAVOC_AWC, none,, eCost_None);
 	Template.AddTargetEffect(Effect);

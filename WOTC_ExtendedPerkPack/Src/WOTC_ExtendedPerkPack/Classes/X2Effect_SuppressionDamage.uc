@@ -1,18 +1,30 @@
-class X2Effect_SuppressionDamage extends X2Effect_ApplyWeaponDamage;
+class X2Effect_SuppressionDamage extends X2Effect_Shredder;
+
+var int ConventionalDamage;
+var int MagneticDamage;
+var int BeamDamage;
 
 function WeaponDamageValue GetBonusEffectDamageValue(XComGameState_Ability AbilityState, XComGameState_Unit SourceUnit, XComGameState_Item SourceWeapon, StateObjectReference TargetRef)
 {
-    local name SourceAbilityName;
     local WeaponDamageValue ReturnDamageValue;
+	local X2WeaponTemplate WeaponTemplate;
 
-    if(SourceUnit.HasSoldierAbility('F_Havoc'))
-    {
-        SourceAbilityName = AbilityState.GetMyTemplateName();
-        if(SourceAbilityName == 'Suppression' || SourceAbilityName == 'LW2WotC_AreaSuppression')
-        {
-	        ReturnDamageValue.Damage = 1;
-        }
-    }
+	ReturnDamageValue = super.GetBonusEffectDamageValue(AbilityState, SourceUnit, SourceWeapon, TargetRef);
+
+	if ((SourceWeapon != none) &&
+		(SourceUnit != none))
+	{
+		WeaponTemplate = X2WeaponTemplate(SourceWeapon.GetMyTemplate());
+		if (WeaponTemplate != none)
+		{
+			if (WeaponTemplate.WeaponTech == 'magnetic')
+				ReturnDamageValue.Damage += MagneticDamage;
+			else if (WeaponTemplate.WeaponTech == 'beam')
+				ReturnDamageValue.Damage += BeamDamage;
+			else
+				ReturnDamageValue.Damage += ConventionalDamage;
+		}
+	}
 
     return ReturnDamageValue;
 }
