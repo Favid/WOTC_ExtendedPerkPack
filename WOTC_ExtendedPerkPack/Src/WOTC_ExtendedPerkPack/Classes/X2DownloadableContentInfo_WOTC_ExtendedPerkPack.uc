@@ -435,6 +435,9 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'REGENERATIVEMIST_HEAL_PER_TURN':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.REGENERATIVEMIST_HEAL_PER_TURN);
 			return true;
+		case 'STILETTO_ARMOR_PIERCING':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.STILETTO_ARMOR_PIERCING);
+			return true;
 		default:
 			return false;
 	}

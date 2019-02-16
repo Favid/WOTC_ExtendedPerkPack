@@ -162,6 +162,8 @@ var config int REGENERATIVEMIST_HEAL_PER_TURN;
 var config int REGENERATIVEMIST_MAX_HEAL_AMOUNT;
 var config bool REGENERATIVEMIST_AWC;
 var config bool CONTROLLEDFIRE_AWC;
+var config int STILETTO_ARMOR_PIERCING;
+var config bool STILETTO_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -250,6 +252,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Survivor());
 	Templates.AddItem(RegenerativeMist());
 	Templates.AddItem(ControlledFire());
+	Templates.AddItem(Stiletto());
 	
 	return Templates;
 }
@@ -2859,7 +2862,7 @@ static function X2AbilityTemplate Survivor()
 
 // Regenerative Mist
 // (AbilityName="F_RegenerativeMist")
-// Your smoke grenades grant a health restoration effect to all targets in the smoke cloud
+// Your smoke grenades grant a health restoration effect to all targets in the smoke cloud. Passive.
 static function X2AbilityTemplate RegenerativeMist()
 {
 	return Passive('F_RegenerativeMist', "img:///UILibrary_XPerkIconPack.UIPerk_smoke_medkit", default.REGENERATIVEMIST_AWC, none);
@@ -2908,4 +2911,32 @@ static function X2AbilityCost_Ammo ControlledFireAmmoCost(X2AbilityCost_Ammo Ori
 	NewAmmoCost.bConsumeAllAmmo = OriginalAmmoCost.bConsumeAllAmmo;
 
 	return NewAmmoCost;
+}
+
+// Stiletto
+// (AbilityName="F_Stiletto", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// Shots with your primary weapon will now pierce armor.
+static function X2AbilityTemplate Stiletto()
+{
+	local XMBEffect_ConditionalBonus ShootingEffect;
+	local X2AbilityTemplate Template;
+
+	// Create an armor piercing bonus
+	ShootingEffect = new class'XMBEffect_ConditionalBonus';
+	ShootingEffect.EffectName = 'F_Stiletto_Bonuses';
+	ShootingEffect.AddArmorPiercingModifier(default.STILETTO_ARMOR_PIERCING);
+
+	// Only with the associated weapon
+	ShootingEffect.AbilityTargetConditions.AddItem(default.MatchingWeaponCondition);
+
+	// Prevent the effect from applying to a unit more than once
+	ShootingEffect.DuplicateResponse = eDupe_Refresh;
+
+	// The effect lasts forever
+	ShootingEffect.BuildPersistentEffect(1, true, false, false, eGameRule_TacticalGameStart);
+	
+	// Activated ability that targets user
+	Template = Passive('F_Stiletto', "img:///UILibrary_XPACK_Common.PerkIcons.UIPerk_Needle", default.STILETTO_AWC, ShootingEffect);
+
+	return Template;
 }
