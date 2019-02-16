@@ -161,6 +161,7 @@ var config bool SURVIVOR_AWC;
 var config int REGENERATIVEMIST_HEAL_PER_TURN;
 var config int REGENERATIVEMIST_MAX_HEAL_AMOUNT;
 var config bool REGENERATIVEMIST_AWC;
+var config bool CONTROLLEDFIRE_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -248,7 +249,8 @@ static function array<X2DataTemplate> CreateTemplates()
     Templates.AddItem(Predator());
 	Templates.AddItem(Survivor());
 	Templates.AddItem(RegenerativeMist());
-
+	Templates.AddItem(ControlledFire());
+	
 	return Templates;
 }
 
@@ -2884,4 +2886,26 @@ static function X2Effect RegenerativeMistEffect()
 	Effect.TargetConditions.AddItem(Condition);
 
 	return Effect;
+}
+
+// Controlled Fire
+// (AbilityName="F_ControlledFire")
+// Additional shots fired from Area Suppression no longer cost ammo.
+static function X2AbilityTemplate ControlledFire()
+{
+	return Passive('F_ControlledFire', "img:///UILibrary_XPerkIconPack.UIPerk_suppression_bullet", default.CONTROLLEDFIRE_AWC, none);
+}
+
+// Added to LW2WotC_AreaSuppressionShot in OnPostTemplatesCreated()
+static function X2AbilityCost_Ammo ControlledFireAmmoCost(X2AbilityCost_Ammo OriginalAmmoCost)
+{
+	local X2AbilityCost_Ammo NewAmmoCost;
+
+	NewAmmoCost = new class'X2AbilityCost_Ammo_ControlledFire';
+	NewAmmoCost.iAmmo = OriginalAmmoCost.iAmmo;
+	NewAmmoCost.UseLoadedAmmo = OriginalAmmoCost.UseLoadedAmmo;
+	NewAmmoCost.bReturnChargesError = OriginalAmmoCost.bReturnChargesError;
+	NewAmmoCost.bConsumeAllAmmo = OriginalAmmoCost.bConsumeAllAmmo;
+
+	return NewAmmoCost;
 }

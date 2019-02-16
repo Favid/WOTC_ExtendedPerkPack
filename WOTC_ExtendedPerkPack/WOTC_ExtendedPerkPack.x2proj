@@ -52,6 +52,9 @@
     <Content Include="Src\LW_Tuple\Classes\LWTuple.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2AbilityCost_Ammo_ControlledFire.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2AbilityTarget_SingleInRange.uc">
       <SubType>Content</SubType>
     </Content>

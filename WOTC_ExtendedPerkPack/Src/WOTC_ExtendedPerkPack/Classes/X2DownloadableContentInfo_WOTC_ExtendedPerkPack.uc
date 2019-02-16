@@ -54,6 +54,8 @@ static event OnPostTemplatesCreated()
     PatchSmokeGrenadeForRegenerativeMist('SmokeGrenade');
     PatchSmokeGrenadeForRegenerativeMist('SmokeGrenadeMk2');
 
+	PatchAbilityForControlledFire('LW2WotC_AreaSuppressionShot');
+
 }
 
 static function PatchAbilityForImposition(name AbilityName)
@@ -159,6 +161,27 @@ private static function PatchSmokeGrenadeForRegenerativeMist(name ItemName)
 		GrenadeTemplate = X2GrenadeTemplate(Template);
 		GrenadeTemplate.ThrownGrenadeEffects.AddItem(class'X2Ability_ExtendedPerkPack'.static.RegenerativeMistEffect());
 		GrenadeTemplate.LaunchedGrenadeEffects.AddItem(class'X2Ability_ExtendedPerkPack'.static.RegenerativeMistEffect());
+	}
+}
+
+private static function PatchAbilityForControlledFire(name AbilityName)
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityCost_Ammo AmmoCost;
+	local int i;
+
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(AbilityName);
+
+	if (Template != none)
+	{
+		for (i = 0; i < Template.AbilityCosts.length; i++)
+		{
+			AmmoCost = X2AbilityCost_Ammo(Template.AbilityCosts[i]);
+			if (AmmoCost != none)
+			{
+				Template.AbilityCosts[i] = class'X2Ability_ExtendedPerkPack'.static.ControlledFireAmmoCost(AmmoCost);
+			}
+		}
 	}
 }
 
