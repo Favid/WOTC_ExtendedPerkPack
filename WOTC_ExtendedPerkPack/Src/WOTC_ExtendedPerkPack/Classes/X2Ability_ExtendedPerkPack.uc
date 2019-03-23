@@ -172,6 +172,8 @@ var config bool EXPOSE_AWC;
 var config int STAYCOVERED_DEFENSE_BONUS;
 var config int STAYCOVERED_DODGE_BONUS;
 var config bool STAYCOVERED_AWC;
+var config int INDOMITABLE_CHARGES;
+var config bool INDOMITABLE_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -267,6 +269,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Expose());
 	Templates.AddItem(ExposeActivator());
 	Templates.AddItem(StayCovered());
+	Templates.AddItem(Indomitable());
 	
 	
 	return Templates;
@@ -3103,4 +3106,31 @@ static function X2Effect_PersistentStatChange StayCoveredEffect()
 	Effect.TargetConditions.AddItem(Condition);
 
 	return Effect;
+}
+
+// Indomitable
+// (AbilityName="F_Indomitable")
+// Become Untouchable for one turn.
+static function X2AbilityTemplate Indomitable()
+{
+	local X2AbilityTemplate                     Template;
+    local X2Effect_DamageImmune                 Effect;
+
+    // Effect granting immunity until next turn
+    Effect = new class'X2Effect_DamageImmune';
+	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
+
+	// Activated ability that targets user
+	Template = SelfTargetActivated('F_Indomitable', "img:///UILibrary_XPerkIconPack.UIPerk_star_defense2", default.INDOMITABLE_AWC, Effect, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_Single);
+	
+	// Cannot be used while burning, etc.
+	Template.AddShooterEffectExclusions();
+
+	// Show a flyover when activated
+	Template.bShowActivation = true;
+
+    // Charges
+    AddCharges(Template, default.INDOMITABLE_CHARGES);
+
+	return Template;
 }
