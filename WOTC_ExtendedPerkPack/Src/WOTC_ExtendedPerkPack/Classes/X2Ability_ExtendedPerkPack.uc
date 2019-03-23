@@ -168,6 +168,7 @@ var config bool REGENERATIVEMIST_AWC;
 var config bool CONTROLLEDFIRE_AWC;
 var config int STILETTO_ARMOR_PIERCING;
 var config bool STILETTO_AWC;
+var config bool EXPOSE_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -257,6 +258,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(RegenerativeMist());
 	Templates.AddItem(ControlledFire());
 	Templates.AddItem(Stiletto());
+	Templates.AddItem(Expose());
+	Templates.AddItem(ExposeActivator());
 	
 	return Templates;
 }
@@ -2965,6 +2968,100 @@ static function X2AbilityTemplate Stiletto()
 	
 	// Activated ability that targets user
 	Template = Passive('F_Stiletto', "img:///UILibrary_XPACK_Common.PerkIcons.UIPerk_Needle", default.STILETTO_AWC, ShootingEffect);
+
+	return Template;
+}
+
+// Expose
+// (AbilityName="F_Expose", ApplyToWeaponSlot=eInvSlot_SecondaryWeapon)
+// Your Knife Fighter ability now applies Rupture.
+static function X2AbilityTemplate Expose()
+{
+	local X2AbilityTemplate Template;
+
+	Template = Passive('F_Expose', "img:///UILibrary_XPerkIconPack.UIPerk_knife_plus", default.EXPOSE_AWC, none);
+	Template.AdditionalAbilities.AddItem('F_Expose_Activator');
+
+	return Template;
+}
+
+// Copy of Knife Fighter that causes Rupture. Replaces Knife Fighter when Expose is learned
+static function X2AbilityTemplate ExposeActivator()
+{
+	local X2AbilityTemplate                 Template;
+	local X2AbilityCost_ActionPoints        ActionPointCost;
+	local X2AbilityToHitCalc_StandardMelee  StandardMelee;
+	local X2Effect_ApplyWeaponDamage        WeaponDamageEffect;
+	local array<name>                       SkipExclusions;
+	local X2Condition_UnitProperty			AdjacencyCondition;	
+	//local X2Condition_ValidWeaponType		WeaponCondition;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Expose_Activator');
+
+	Template.AbilitySourceName = 'eAbilitySource_Standard';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_AlwaysShow;
+	Template.IconImage = "img:///UILibrary_LWSecondariesWOTC.LW_AbilityKnifeFighter";
+	Template.bHideOnClassUnlock = false;
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.CLASS_SQUADDIE_PRIORITY;
+	Template.AbilityConfirmSound = "TacticalUI_SwordConfirm";
+	Template.bUniqueSource = true;
+
+	Template.bDisplayInUITooltip = true;
+    Template.bDisplayInUITacticalText = true;
+    Template.DisplayTargetHitChance = true;
+	Template.bShowActivation = true;
+	Template.bSkipFireAction = false;
+
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.iNumPoints = 1;
+	ActionPointCost.bConsumeAllPoints = false;
+	Template.AbilityCosts.AddItem(ActionPointCost);
+	
+	StandardMelee = new class'X2AbilityToHitCalc_StandardMelee';
+	Template.AbilityToHitCalc = StandardMelee;
+
+    Template.AbilityTargetStyle = default.SimpleSingleMeleeTarget;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	// Target Conditions
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileTargetProperty);
+	Template.AbilityTargetConditions.AddItem(default.MeleeVisibilityCondition);
+	AdjacencyCondition = new class'X2Condition_UnitProperty';
+	AdjacencyCondition.RequireWithinRange = true;
+	AdjacencyCondition.WithinRange = 144; //1.5 tiles in Unreal units, allows attacks on the diag
+	Template.AbilityTargetConditions.AddItem(AdjacencyCondition);
+
+	// Shooter Conditions
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	SkipExclusions.AddItem(class'X2AbilityTemplateManager'.default.DisorientedName); //okay when disoriented
+	Template.AddShooterEffectExclusions(SkipExclusions);
+	
+	// TODO only allow for combat knives
+	//WeaponCondition = new class'X2Condition_ValidWeaponType';
+	//WeaponCondition.AllowedWeaponCategories = default.VALID_WEAPON_CATEGORIES_FOR_SKILLS;
+	//Template.AbilityShooterConditions.AddItem(WeaponCondition);
+
+	// Damage Effect - this is where rupture happens
+	WeaponDamageEffect = new class'X2Effect_ApplyWeaponDamage';
+	WeaponDamageEffect.bIgnoreBaseDamage = true;
+	WeaponDamageEffect.DamageTag = 'F_Expose';
+	Template.AddTargetEffect(WeaponDamageEffect);
+	Template.bAllowBonusWeaponEffects = true;
+	
+	// VGamepliz matters
+	Template.SourceMissSpeech = 'SwordMiss';
+	Template.bSkipMoveStop = true;
+
+	Template.CinescriptCameraType = "Ranger_Reaper";
+    Template.BuildNewGameStateFn = TypicalMoveEndAbility_BuildGameState;
+	Template.BuildInterruptGameStateFn = TypicalMoveEndAbility_BuildInterruptGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	Template.SuperConcealmentLoss = class'X2AbilityTemplateManager'.default.SuperConcealmentStandardShotLoss;
+	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotChosenActivationIncreasePerUse;
+	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.MeleeLostSpawnIncreasePerUse;
+	
+	Template.OverrideAbilities.AddItem('KnifeFighter');
 
 	return Template;
 }
