@@ -479,6 +479,12 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'PERFECTGUARD_ARMOR_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PERFECTGUARD_ARMOR_BONUS);
 			return true;
+		case 'SHIELDREGENERATION_SHIELD':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHIELDREGENERATION_SHIELD);
+			return true;
+		case 'SHIELDREGENERATION_SHIELD_MAX':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHIELDREGENERATION_SHIELD_MAX);
+			return true;
 		default:
 			return false;
 	}

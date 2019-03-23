@@ -176,6 +176,10 @@ var config int INDOMITABLE_CHARGES;
 var config bool INDOMITABLE_AWC;
 var config int PERFECTGUARD_ARMOR_BONUS;
 var config bool PERFECTGUARD_AWC;
+var config int SHIELDREGENERATION_SHIELD;
+var config int SHIELDREGENERATION_SHIELD_MAX;
+var config bool SHIELDREGENERATION_AWC;
+
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -276,6 +280,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(StayCovered());
 	Templates.AddItem(Indomitable());
 	Templates.AddItem(PerfectGuard());
+	Templates.AddItem(ShieldRegeneration());
 	
 	
 	return Templates;
@@ -3169,4 +3174,38 @@ static function X2Effect_PersistentStatChange PerfectGuardEffect()
 	Effect.TargetConditions.AddItem(Condition);
 
 	return Effect;
+}
+
+// Shield Regeneration
+// (AbilityName="F_ShieldRegeneration")
+// Gain Shield at the beginning of each turn if your current Shield is below the specified value
+static function X2AbilityTemplate ShieldRegeneration()
+{
+	local X2AbilityTemplate                     Template;
+    local X2Condition_UnitProperty              HealTargetCondition;
+	local X2Effect_PersistentStatChange			Effect;
+	local X2Condition_UnitStatCheck				UnitStatCheckCondition;
+
+    // Create the bonus effect
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'F_ShieldRegeneration_Bonus';
+	Effect.AddPersistentStatChange(eStat_ShieldHP, default.SHIELDREGENERATION_SHIELD);
+	Effect.DuplicateResponse = eDupe_Allow;
+	Effect.BuildPersistentEffect(1, true, true, false);
+
+    // Activated ability that targets user
+	Template = SelfTargetTrigger('F_ShieldRegeneration', "img:///UILibrary_XPerkIconPack.UIPerk_shield_cycle", default.SHIELDREGENERATION_AWC, Effect, 'PlayerTurnBegun', eFilter_Player);
+
+	// Does not activate while dead
+	AddTriggerTargetCondition(Template, default.LivingShooterProperty);
+
+	// Only activates when shield is below a threshold
+	UnitStatCheckCondition = new class'X2Condition_UnitStatCheck';
+	UnitStatCheckCondition.AddCheckStat(eStat_ShieldHP, default.SHIELDREGENERATION_SHIELD_MAX, eCheck_LessThan);
+	AddTriggerTargetCondition(Template, UnitStatCheckCondition);
+    
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
+    
+	return Template;
 }
