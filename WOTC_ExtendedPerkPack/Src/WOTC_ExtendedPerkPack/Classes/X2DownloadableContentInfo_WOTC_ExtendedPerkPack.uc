@@ -47,6 +47,7 @@ static event OnPostTemplatesCreated()
 
     PatchAbilityForFaultlessDefense('ShieldWall');
     PatchAbilityForBolsteredWall('ShieldWall');
+	PatchAbilityForStayCovered('ShieldWall');
     
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenade');
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenadeMk2');
@@ -127,6 +128,18 @@ static function PatchAbilityForBolsteredWall(name AbilityName)
 	if (Template != none)
 	{
 		Template.AddTargetEffect(class'X2Ability_ExtendedPerkPack'.static.BolsteredWallEffect());
+	}
+}
+
+static function PatchAbilityForStayCovered(name AbilityName)
+{
+	local X2AbilityTemplate Template;
+
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(AbilityName);
+
+	if (Template != none)
+	{
+		Template.AddTargetEffect(class'X2Ability_ExtendedPerkPack'.static.StayCoveredEffect());
 	}
 }
 

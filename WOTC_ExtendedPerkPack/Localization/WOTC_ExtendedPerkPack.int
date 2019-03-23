@@ -10,3 +10,6 @@ LocFaultlessDefenseEffectDescription="While Shield Wall is active, you cannot be
 
 LocRegenerativeMistEffect="Regenerative Mist"
 LocRegenerativeMistEffectDescription="This smoke effect was created by a unit with Regenerative Mist, granting health restoration."
+
+LocBolsteredWallEffect="Stay Covered"
+LocBolsteredWallEffectDescription="Removes the Defense penalty from Shield Wall."

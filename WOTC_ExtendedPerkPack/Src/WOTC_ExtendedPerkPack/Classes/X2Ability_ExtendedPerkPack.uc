@@ -169,6 +169,9 @@ var config bool CONTROLLEDFIRE_AWC;
 var config int STILETTO_ARMOR_PIERCING;
 var config bool STILETTO_AWC;
 var config bool EXPOSE_AWC;
+var config int STAYCOVERED_DEFENSE_BONUS;
+var config int STAYCOVERED_DODGE_BONUS;
+var config bool STAYCOVERED_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -181,6 +184,9 @@ var localized string LocFaultlessDefenseEffectDescription;
 
 var localized string LocRegenerativeMistEffect;
 var localized string LocRegenerativeMistEffectDescription;
+
+var localized string LocStayCoveredEffect;
+var localized string LocStayCoveredEffectDescription;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -260,6 +266,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Stiletto());
 	Templates.AddItem(Expose());
 	Templates.AddItem(ExposeActivator());
+	Templates.AddItem(StayCovered());
+	
 	
 	return Templates;
 }
@@ -3064,4 +3072,35 @@ static function X2AbilityTemplate ExposeActivator()
 	Template.OverrideAbilities.AddItem('KnifeFighter');
 
 	return Template;
+}
+
+// Stay Covered
+// (AbilityName="F_StayCovered")
+// Shield Wall no longer lowers your defense.
+static function X2AbilityTemplate StayCovered()
+{
+	return PurePassive('F_StayCovered', "img:///UILibrary_XPerkIconPack.UIPerk_defense_plus", default.STAYCOVERED_AWC, 'eAbilitySource_Perk');
+}
+
+// Added to ShieldWall in OnPostTemplatesCreated()
+static function X2Effect_PersistentStatChange StayCoveredEffect()
+{
+    local X2Effect_PersistentStatChange		    Effect;
+	local X2Condition_AbilityProperty   Condition;
+
+    // Create the bonus effect
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'F_StayCovered_Bonus';
+	Effect.AddPersistentStatChange(eStat_Defense, default.STAYCOVERED_DEFENSE_BONUS);
+	Effect.AddPersistentStatChange(eStat_Dodge, default.STAYCOVERED_DODGE_BONUS);
+	Effect.DuplicateResponse = eDupe_Refresh;
+	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
+    Effect.SetDisplayInfo(ePerkBuff_Bonus, default.LocStayCoveredEffect, default.LocStayCoveredEffectDescription, "img:///UILibrary_XPerkIconPack.UIPerk_defense_plus", true, , 'eAbilitySource_Perk');
+
+    // Only apply if user has the Bolstered Wall passive
+	Condition = new class'X2Condition_AbilityProperty';
+	Condition.OwnerHasSoldierAbilities.AddItem('F_StayCovered');
+	Effect.TargetConditions.AddItem(Condition);
+
+	return Effect;
 }
