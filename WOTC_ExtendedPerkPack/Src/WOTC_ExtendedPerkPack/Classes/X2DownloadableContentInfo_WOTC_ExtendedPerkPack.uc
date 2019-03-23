@@ -485,6 +485,12 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'SHIELDREGENERATION_SHIELD_MAX':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHIELDREGENERATION_SHIELD_MAX);
 			return true;
+		case 'CALMMIND_PSI':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.CALMMIND_PSI);
+			return true;
+		case 'CALMMIND_WILL':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.CALMMIND_WILL);
+			return true;
 		default:
 			return false;
 	}

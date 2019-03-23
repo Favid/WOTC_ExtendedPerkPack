@@ -179,6 +179,10 @@ var config bool PERFECTGUARD_AWC;
 var config int SHIELDREGENERATION_SHIELD;
 var config int SHIELDREGENERATION_SHIELD_MAX;
 var config bool SHIELDREGENERATION_AWC;
+var config int CALMMIND_PSI;
+var config int CALMMIND_WILL;
+var config bool CALMMIND_AWC;
+
 
 
 var localized string LocCombatDrugsEffect;
@@ -281,6 +285,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Indomitable());
 	Templates.AddItem(PerfectGuard());
 	Templates.AddItem(ShieldRegeneration());
+	Templates.AddItem(CalmMind());
 	
 	
 	return Templates;
@@ -3182,7 +3187,6 @@ static function X2Effect_PersistentStatChange PerfectGuardEffect()
 static function X2AbilityTemplate ShieldRegeneration()
 {
 	local X2AbilityTemplate                     Template;
-    local X2Condition_UnitProperty              HealTargetCondition;
 	local X2Effect_PersistentStatChange			Effect;
 	local X2Condition_UnitStatCheck				UnitStatCheckCondition;
 
@@ -3206,6 +3210,27 @@ static function X2AbilityTemplate ShieldRegeneration()
     
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
+    
+	return Template;
+}
+
+// CalmMind
+// (AbilityName="F_CalmMind")
+// Permanently increases your Psi Offense and Will
+static function X2AbilityTemplate CalmMind()
+{
+	local X2AbilityTemplate                     Template;
+	local X2Effect_PersistentStatChange			Effect;
+
+    // Create the bonus effect
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'F_CalmMind_Bonus';
+	Effect.AddPersistentStatChange(eStat_PsiOffense, default.CALMMIND_PSI);
+	Effect.AddPersistentStatChange(eStat_Will, default.CALMMIND_WILL);
+	Effect.DuplicateResponse = eDupe_Ignore;
+
+    // Activated ability that targets user
+	Template = Passive('F_CalmMind', "img:///UILibrary_XPerkIconPack.Perk_Ph_Predator", default.CALMMIND_AWC, Effect);
     
 	return Template;
 }
