@@ -174,6 +174,8 @@ var config int STAYCOVERED_DODGE_BONUS;
 var config bool STAYCOVERED_AWC;
 var config int INDOMITABLE_CHARGES;
 var config bool INDOMITABLE_AWC;
+var config int PERFECTGUARD_ARMOR_BONUS;
+var config bool PERFECTGUARD_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -189,6 +191,9 @@ var localized string LocRegenerativeMistEffectDescription;
 
 var localized string LocStayCoveredEffect;
 var localized string LocStayCoveredEffectDescription;
+
+var localized string LocPerfectGuardEffect;
+var localized string LocPerfectGuardEffectDescription;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -270,6 +275,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(ExposeActivator());
 	Templates.AddItem(StayCovered());
 	Templates.AddItem(Indomitable());
+	Templates.AddItem(PerfectGuard());
 	
 	
 	return Templates;
@@ -3100,7 +3106,7 @@ static function X2Effect_PersistentStatChange StayCoveredEffect()
 	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
     Effect.SetDisplayInfo(ePerkBuff_Bonus, default.LocStayCoveredEffect, default.LocStayCoveredEffectDescription, "img:///UILibrary_XPerkIconPack.UIPerk_defense_plus", true, , 'eAbilitySource_Perk');
 
-    // Only apply if user has the Bolstered Wall passive
+    // Only apply if user has the Stay Covered passive
 	Condition = new class'X2Condition_AbilityProperty';
 	Condition.OwnerHasSoldierAbilities.AddItem('F_StayCovered');
 	Effect.TargetConditions.AddItem(Condition);
@@ -3133,4 +3139,34 @@ static function X2AbilityTemplate Indomitable()
     AddCharges(Template, default.INDOMITABLE_CHARGES);
 
 	return Template;
+}
+
+// Perfect Guard
+// (AbilityName="F_PerfectGuard")
+// Gain Armor while Shield Wall is active
+static function X2AbilityTemplate PerfectGuard()
+{
+	return PurePassive('F_PerfectGuard', "img:///UILibrary_XPerkIconPack.UIPerk_defense_blaze", default.PERFECTGUARD_AWC, 'eAbilitySource_Perk');
+}
+
+// Added to ShieldWall in OnPostTemplatesCreated()
+static function X2Effect_PersistentStatChange PerfectGuardEffect()
+{
+    local X2Effect_PersistentStatChange		    Effect;
+	local X2Condition_AbilityProperty   Condition;
+
+    // Create the bonus effect
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'F_PerfectGuard_Bonus';
+	Effect.AddPersistentStatChange(eStat_ArmorMitigation, default.PERFECTGUARD_ARMOR_BONUS);
+	Effect.DuplicateResponse = eDupe_Refresh;
+	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
+    Effect.SetDisplayInfo(ePerkBuff_Bonus, default.LocPerfectGuardEffect, default.LocPerfectGuardEffectDescription, "img:///UILibrary_XPerkIconPack.UIPerk_defense_blaze", true, , 'eAbilitySource_Perk');
+
+    // Only apply if user has the Perfect Guard passive
+	Condition = new class'X2Condition_AbilityProperty';
+	Condition.OwnerHasSoldierAbilities.AddItem('F_PerfectGuard');
+	Effect.TargetConditions.AddItem(Condition);
+
+	return Effect;
 }

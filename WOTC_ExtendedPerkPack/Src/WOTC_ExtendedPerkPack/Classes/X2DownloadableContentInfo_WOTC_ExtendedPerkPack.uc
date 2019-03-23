@@ -48,6 +48,7 @@ static event OnPostTemplatesCreated()
     PatchAbilityForFaultlessDefense('ShieldWall');
     PatchAbilityForBolsteredWall('ShieldWall');
 	PatchAbilityForStayCovered('ShieldWall');
+	PatchAbilityForPerfectGuard('ShieldWall');
     
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenade');
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenadeMk2');
@@ -140,6 +141,18 @@ static function PatchAbilityForStayCovered(name AbilityName)
 	if (Template != none)
 	{
 		Template.AddTargetEffect(class'X2Ability_ExtendedPerkPack'.static.StayCoveredEffect());
+	}
+}
+
+static function PatchAbilityForPerfectGuard(name AbilityName)
+{
+	local X2AbilityTemplate Template;
+
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(AbilityName);
+
+	if (Template != none)
+	{
+		Template.AddTargetEffect(class'X2Ability_ExtendedPerkPack'.static.PerfectGuardEffect());
 	}
 }
 
@@ -462,6 +475,9 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		case 'ADRENALINE_ACTIVATIONS_PER_MISSION':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.ADRENALINE_ACTIVATIONS_PER_MISSION);
+			return true;
+		case 'PERFECTGUARD_ARMOR_BONUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PERFECTGUARD_ARMOR_BONUS);
 			return true;
 		default:
 			return false;
