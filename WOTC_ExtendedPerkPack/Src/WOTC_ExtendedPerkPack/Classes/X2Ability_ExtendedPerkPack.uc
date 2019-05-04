@@ -3192,15 +3192,16 @@ static function X2AbilityTemplate ShieldRegeneration()
 	local X2Effect_PersistentStatChange			Effect;
 	local X2Condition_UnitStatCheck				UnitStatCheckCondition;
 
+    // Activated ability that targets user
+	Template = SelfTargetTrigger('F_ShieldRegeneration', "img:///UILibrary_XPerkIconPack.UIPerk_shield_cycle", default.SHIELDREGENERATION_AWC, none, 'PlayerTurnBegun', eFilter_Player);
+
     // Create the bonus effect
 	Effect = new class'X2Effect_PersistentStatChange';
 	Effect.EffectName = 'F_ShieldRegeneration_Bonus';
 	Effect.AddPersistentStatChange(eStat_ShieldHP, default.SHIELDREGENERATION_SHIELD);
 	Effect.DuplicateResponse = eDupe_Allow;
 	Effect.BuildPersistentEffect(1, true, true, false);
-
-    // Activated ability that targets user
-	Template = SelfTargetTrigger('F_ShieldRegeneration', "img:///UILibrary_XPerkIconPack.UIPerk_shield_cycle", default.SHIELDREGENERATION_AWC, Effect, 'PlayerTurnBegun', eFilter_Player);
+	Template.AddTargetEffect(Effect);
 
 	// Does not activate while dead
 	AddTriggerTargetCondition(Template, default.LivingShooterProperty);
@@ -3208,7 +3209,7 @@ static function X2AbilityTemplate ShieldRegeneration()
 	// Only activates when shield is below a threshold
 	UnitStatCheckCondition = new class'X2Condition_UnitStatCheck';
 	UnitStatCheckCondition.AddCheckStat(eStat_ShieldHP, default.SHIELDREGENERATION_SHIELD_MAX, eCheck_LessThan);
-	AddTriggerTargetCondition(Template, UnitStatCheckCondition);
+	Template.AbilityTargetConditions.AddItem(UnitStatCheckCondition);
     
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
