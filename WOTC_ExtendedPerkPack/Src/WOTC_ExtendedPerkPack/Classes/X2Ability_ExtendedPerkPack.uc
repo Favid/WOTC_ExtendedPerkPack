@@ -126,9 +126,8 @@ var config bool VITALSTRIKE_AWC;
 var config int OPENFIRE_AIM;
 var config int OPENFIRE_CRIT;
 var config bool OPENFIRE_AWC;
-var config int HAVOC_DAMAGE_CV;
-var config int HAVOC_DAMAGE_MG;
-var config int HAVOC_DAMAGE_BM;
+var config array<int> HAVOC_DAMAGE;
+var config array<name> HAVOC_WEAPON_TECH;
 var config bool HAVOC_AWC;
 var config bool FINESSE_AWC;
 var config int SHOULDERTOLEANON_RADIUS;
@@ -2244,9 +2243,8 @@ static function X2AbilityTemplate Havoc()
 
 	Effect = new class'X2Effect_SuppressionDamage';
     Effect.EffectDamageValue = DamageValue;
-	Effect.ConventionalDamage = default.HAVOC_DAMAGE_CV;
-	Effect.MagneticDamage = default.HAVOC_DAMAGE_MG;
-	Effect.BeamDamage = default.HAVOC_DAMAGE_BM;
+	Effect.Damage = default.HAVOC_DAMAGE;
+	Effect.WeaponTech = default.HAVOC_WEAPON_TECH;
 
 	Template = TargetedDebuff('F_Havoc', "img:///UILibrary_FavidsPerkPack.UIPerk_Mayhem", default.HAVOC_AWC, none,, eCost_None);
 	Template.AddTargetEffect(Effect);
