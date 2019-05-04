@@ -2745,6 +2745,8 @@ static function X2AbilityTemplate Avenger()
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	//  NOTE: No visualization on purpose!
+	
+	Template.AdditionalAbilities.AddItem('PistolReturnFire');
 
 	Template.bCrossClassEligible = false;       //  this can only work with pistols, which only sharpshooters have
 
@@ -2784,6 +2786,8 @@ static function X2AbilityTemplate FireFirst()
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	//  NOTE: No visualization on purpose!
+	
+	Template.AdditionalAbilities.AddItem('PistolReturnFire');
 
 	Template.bCrossClassEligible = false;       //  this can only work with pistols, which only sharpshooters have
 
@@ -3230,7 +3234,7 @@ static function X2AbilityTemplate CalmMind()
 	Effect.DuplicateResponse = eDupe_Ignore;
 
     // Activated ability that targets user
-	Template = Passive('F_CalmMind', "img:///UILibrary_XPerkIconPack.Perk_Ph_Predator", default.CALMMIND_AWC, Effect);
+	Template = Passive('F_CalmMind', "img:///UILibrary_XPerkIconPack.UIPerk_mind_plus", default.CALMMIND_AWC, Effect);
     
 	return Template;
 }
