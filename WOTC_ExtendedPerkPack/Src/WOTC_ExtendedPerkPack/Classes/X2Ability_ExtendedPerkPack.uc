@@ -176,8 +176,6 @@ var config int CALMMIND_PSI;
 var config int CALMMIND_WILL;
 var config bool CALMMIND_AWC;
 
-
-
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
 

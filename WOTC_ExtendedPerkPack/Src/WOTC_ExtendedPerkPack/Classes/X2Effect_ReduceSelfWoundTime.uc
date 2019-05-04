@@ -25,22 +25,22 @@ function ReduceWoundTime(XComGameState_Effect EffectState, XComGameState_Unit Or
     }
 
     SourceUnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(EffectState.ApplyEffectParameters.SourceStateObjectRef.ObjectID));
-    //`LOG("Field Surgeon: TargetUnit=" $ UnitState.GetFullName() $ ", SourceUnit=" $ SourceUnitState.GetFullName());
+    `LOG("X2Effect_ReduceSelfWoundTime: TargetUnit=" $ UnitState.GetFullName() $ ", SourceUnit=" $ SourceUnitState.GetFullName());
 
     if(!ReduceWoundTimeEffectIsValidForSource(SourceUnitState)) { return; }
 
-    //`LOG("Field Surgeon: Source Unit Valid.");
+    `LOG("X2Effect_ReduceSelfWoundTime: Source Unit Valid.");
 
     if(UnitState == none) { return; }
     if(UnitState.IsDead()) { return; }
     if(UnitState.IsBleedingOut()) { return; }
     if(!CanBeHealed(UnitState)) { return; }
 
-    //`LOG("Field Surgeon: Target Unit Can Be Healed.");
+    `LOG("X2Effect_ReduceSelfWoundTime: Target Unit Can Be Healed.");
 
-    //`LOG("Field Surgeon : Pre update LowestHP=" $ UnitState.LowestHP);
+    `LOG("X2Effect_ReduceSelfWoundTime: Pre update LowestHP=" $ UnitState.LowestHP);
     UnitState.LowestHP += 1;
-    //`LOG("Field Surgeon : Post update LowestHP=" $ UnitState.LowestHP);
+    `LOG("X2Effect_ReduceSelfWoundTime: Post update LowestHP=" $ UnitState.LowestHP);
 
     // Armor HP may have already been removed, apparently healing the unit since we have not yet
     // executed EndTacticalHealthMod. We may only appear injured here for large injuries (or little
