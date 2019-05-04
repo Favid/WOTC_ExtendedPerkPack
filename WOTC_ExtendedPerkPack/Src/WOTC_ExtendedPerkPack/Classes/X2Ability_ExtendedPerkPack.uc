@@ -695,6 +695,7 @@ static function X2AbilityTemplate ThousandsToGo()
 {
 	local X2Effect_GrantActionPoints Effect;
 	local X2AbilityTemplate Template;
+	local X2Condition_UnitType UnitTypeCondition;
 	local X2Condition_UnitValue ValueCondition;
 	local X2Effect_IncrementUnitValue IncrementEffect;
 
@@ -708,6 +709,11 @@ static function X2AbilityTemplate ThousandsToGo()
     
     // Only trigger on kills with the matching weapon
 	AddTriggerTargetCondition(Template, default.MatchingWeaponCondition);
+
+	// Does not trigger when killing Lost
+	UnitTypeCondition = new class'X2Condition_UnitType';
+	UnitTypeCondition.ExcludeTypes.AddItem('TheLost');
+	AddTriggerTargetCondition(Template, UnitTypeCondition);
     
 	// Limit activations
 	ValueCondition = new class'X2Condition_UnitValue';
