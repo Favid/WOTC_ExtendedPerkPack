@@ -404,12 +404,6 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'WARNINGSHOT_CHARGES':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.WARNINGSHOT_CHARGES);
 			return true;
-		case 'VITALSTRIKE_DAMAGE_BONUS':
-			OutString = string(class'X2Ability_ExtendedPerkPack'.default.VITALSTRIKE_DAMAGE_BONUS);
-			return true;
-		case 'VITALSTRIKE_COOLDOWN':
-			OutString = string(class'X2Ability_ExtendedPerkPack'.default.VITALSTRIKE_COOLDOWN);
-			return true;
 		case 'FIELDMEDIC_BONUS_ITEMS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.FIELDMEDIC_BONUS_ITEMS);
 			return true;

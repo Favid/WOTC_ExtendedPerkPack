@@ -118,11 +118,6 @@ var config bool RENEWAL_AWC;
 var config int WARNINGSHOT_AMMO_COST;
 var config int WARNINGSHOT_CHARGES;
 var config bool WARNINGSHOT_AWC;
-var config int VITALSTRIKE_RUPTURE;
-var config int VITALSTRIKE_AMMO_COST;
-var config int VITALSTRIKE_COOLDOWN;
-var config int VITALSTRIKE_DAMAGE_BONUS;
-var config bool VITALSTRIKE_AWC;
 var config int OPENFIRE_AIM;
 var config int OPENFIRE_CRIT;
 var config bool OPENFIRE_AWC;
@@ -282,7 +277,6 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(PerfectGuard());
 	Templates.AddItem(ShieldRegeneration());
 	Templates.AddItem(CalmMind());
-	
 	
 	return Templates;
 }
@@ -2830,7 +2824,7 @@ static function X2AbilityTemplate FlatlineDamageBonus()
 	// The bonus reduces damage by a percentage
 	Effect.AddDamageModifier(default.FLATLINE_DAMAGE_BONUS);
 
-	// The bonus only applies to the Vital Strike ability
+	// The bonus only applies to the Flatline ability
 	Condition = new class'XMBCondition_AbilityName';
 	Condition.IncludeAbilityNames.AddItem('F_Flatline');
 	Effect.AbilityTargetConditions.AddItem(Condition);
