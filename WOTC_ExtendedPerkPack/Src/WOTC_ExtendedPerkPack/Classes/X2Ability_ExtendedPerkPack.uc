@@ -319,6 +319,9 @@ static function X2AbilityTemplate ChipAway()
 	// Add a secondary ability to provide bonuses on the shot
 	AddSecondaryAbility(Template, ChipAwayBonuses());
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
 	return Template;
 }
 
@@ -403,6 +406,9 @@ static function X2AbilityTemplate LikeLightning()
 	// Add secondary ability that will refund arc thrower action points when used while Run and Gun is active
 	AddSecondaryAbility(Template, LikeLightningRefund());
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
+
 	return Template;
 }
 
@@ -478,6 +484,9 @@ static function X2AbilityTemplate StationaryThreat()
 
 	// Secondary ability that sets 'turns without movement' to 0 when a move is made
 	AddSecondaryAbility(Template, StationaryThreatMovement());
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -568,6 +577,9 @@ static function X2AbilityTemplate Maim()
 	Effect.SetDisplayInfo(ePerkBuff_Penalty, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true, , Template.AbilitySourceName);
 	Effect.VisualizationFn = EffectFlyOver_Visualization;
 	Template.AddTargetEffect(Effect);
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -731,6 +743,9 @@ static function X2AbilityTemplate ThousandsToGo()
 	// Show a flyover when activated
 	Template.bShowActivation = true;
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
 	return Template;
 }
 
@@ -758,6 +773,9 @@ static function X2AbilityTemplate Recharge()
 
 	// Show a flyover when activated
 	Template.bShowActivation = true;
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -811,6 +829,9 @@ static function X2AbilityTemplate PierceTheVeil()
 	CooldownEffect.IncreaseAll = false;
 	CooldownEffect.OnlyAlreadyOnCooldown = false;
 	Template.AddTargetEffect(CooldownEffect);
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -908,6 +929,9 @@ static function X2AbilityTemplate LockNLoad()
 
 	// Show a flyover when activated
 	Template.bShowActivation = true;
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -1086,6 +1110,9 @@ static function X2AbilityTemplate FirstStrike()
 	FlankingBonusEffect.AbilityTargetConditions.AddItem(default.FlankedCondition);
     AddSecondaryEffect(Template, FlankingBonusEffect);
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
 	return Template;
 }
 
@@ -1114,6 +1141,9 @@ static function X2AbilityTemplate DisablingShot()
 
 	// Cooldown
 	AddCooldown(Template, default.DISABLINGSHOT_COOLDOWN);
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -1284,6 +1314,9 @@ static function X2AbilityTemplate ReadyForAnything()
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
     return Template;
 }
 
@@ -1334,6 +1367,9 @@ static function X2AbilityTemplate Resupply()
     // Charges
 	AddCharges(Template, default.RESUPPLY_CHARGES);
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
+
 	return Template;
 }
 
@@ -1364,6 +1400,9 @@ static function X2AbilityTemplate Immunize()
     
     // for later ref
 	Template.CustomSelfFireAnim = 'NO_DefenseProtocolA';
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
 
 	return Template;
 }
@@ -1396,6 +1435,9 @@ static function X2AbilityTemplate Rush()
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	SkipExclusions.AddItem(class'X2AbilityTemplateManager'.default.DisorientedName);
 	Template.AddShooterEffectExclusions(SkipExclusions);
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
 
 	return Template;
 }
@@ -1772,6 +1814,9 @@ static function X2AbilityTemplate BlindingFire()
 	// Add a secondary ability to provide an aim penalty for the shooter on the shot
 	AddSecondaryAbility(Template, BlindingFireMalus());
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
 	return Template;
 }
 
@@ -1914,6 +1959,9 @@ static function X2AbilityTemplate Unload()
 	// This should grant the damage modification effect that only applies to Unload
 	Template.AdditionalAbilities.AddItem('F_UnloadDamage');
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
 	return Template;
 }
 
@@ -2026,6 +2074,9 @@ static function X2AbilityTemplate Ambush()
 
     // Use our own configuration value for AWC setting
     Template.bCrossClassEligible = default.AMBUSH_AWC;
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
     return Template;
 }
@@ -2195,6 +2246,9 @@ static function X2AbilityTemplate WarningShot()
 	// Charges
 	AddCharges(Template, default.WARNINGSHOT_CHARGES);
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
 	return Template;
 }
 
@@ -2265,6 +2319,9 @@ static function X2AbilityTemplate Havoc()
     NameCondition.IncludeAbilityNames.AddItem('Suppression');
     NameCondition.IncludeAbilityNames.AddItem('LW2WotC_AreaSuppression');
 	EventListener.AbilityTargetConditions.AddItem(NameCondition);
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
     
 	return Template;
 }
@@ -2531,6 +2588,9 @@ static function X2AbilityTemplate WatchThemRun()
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
     return Template;
 }
 
@@ -2701,6 +2761,9 @@ static function X2AbilityTemplate ShieldTrauma()
     
 	Template.OverrideAbilities.AddItem('ShieldBash');
 
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
+
 	return Template;
 }
 
@@ -2739,9 +2802,13 @@ static function X2AbilityTemplate Avenger()
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	//  NOTE: No visualization on purpose!
 	
+	// Although the ability name is PistolReturnFire, it will work with any gun
 	Template.AdditionalAbilities.AddItem('PistolReturnFire');
 
-	Template.bCrossClassEligible = false;       //  this can only work with pistols, which only sharpshooters have
+	Template.bCrossClassEligible = false;
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -2782,7 +2849,10 @@ static function X2AbilityTemplate FireFirst()
 	
 	Template.AdditionalAbilities.AddItem('PistolReturnFire');
 
-	Template.bCrossClassEligible = false;       //  this can only work with pistols, which only sharpshooters have
+	Template.bCrossClassEligible = false;
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -2811,6 +2881,9 @@ static function X2AbilityTemplate Flatline()
 
     // Secondary ability that grants a damage bonus
     AddSecondaryAbility(Template, FlatlineDamageBonus());
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
@@ -2843,7 +2916,7 @@ static function X2AbilityTemplate FlatlineDamageBonus()
 }
 
 // Cold Blooded
-// (AbilityName="F_ColdBlooded"
+// (AbilityName="F_ColdBlooded")
 // The first standard shot you take against an enemy suffering from bleeding, poison, burning, or acid burning does not cost an action.
 static function X2AbilityTemplate ColdBlooded()
 {
@@ -2992,6 +3065,9 @@ static function X2AbilityTemplate Stiletto()
 	
 	// Activated ability that targets user
 	Template = Passive('F_Stiletto', "img:///UILibrary_XPACK_Common.PerkIcons.UIPerk_Needle", default.STILETTO_AWC, ShootingEffect);
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
 
 	return Template;
 }
