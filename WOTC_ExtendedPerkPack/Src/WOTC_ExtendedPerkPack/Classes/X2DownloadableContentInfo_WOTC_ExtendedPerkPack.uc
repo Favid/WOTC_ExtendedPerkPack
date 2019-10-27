@@ -65,6 +65,8 @@ static event OnPostTemplatesCreated()
 	PatchAbilityForControlledFire('LW2WotC_AreaSuppressionShot');
 	PatchAbilityForControlledFire('AreaSuppressionShot_LW');
 
+	PatchSuppressionForSuppressingFire();
+
 }
 
 static function PatchAbilityForImposition(name AbilityName)
@@ -215,6 +217,35 @@ private static function PatchAbilityForControlledFire(name AbilityName)
 				Template.AbilityCosts[i] = class'X2Ability_ExtendedPerkPack'.static.ControlledFireAmmoCost(AmmoCost);
 			}
 		}
+	}
+}
+
+private static function PatchSuppressionForSuppressingFire()
+{
+	local X2AbilityTemplate Template;
+	local bool LwotcFound;
+	local X2AbilityTrigger_EventListener Trigger;
+	local X2AbilityCost_Ammo AmmoCost;
+	local X2AbilityCost_ActionPoints ActionPointCost;
+
+	// Look for LWOTC's version of Suppression, and use that if it's available
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('Suppression_LW');
+
+	if (Template == none)
+	{
+		// If it's not, use the base game version
+		Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('Suppression');
+	}
+	
+	if (Template != none)
+	{
+		// Create a trigger that will cause the suppression ability to activate when Suppressing Fire is used
+		Trigger = new class'X2AbilityTrigger_EventListener';
+		Trigger.ListenerData.Deferral = ELD_OnStateSubmitted;
+		Trigger.ListenerData.EventID = 'Suppressing';
+		Trigger.ListenerData.Filter = eFilter_Unit;
+		Trigger.ListenerData.EventFn = class'XComGameState_Ability'.static.AbilityTriggerEventListener_OriginalTarget;
+		Template.AbilityTriggers.AddItem(Trigger);
 	}
 }
 

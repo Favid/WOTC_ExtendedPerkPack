@@ -175,6 +175,7 @@ var config bool SHIELDREGENERATION_AWC;
 var config int CALMMIND_PSI;
 var config int CALMMIND_WILL;
 var config bool CALMMIND_AWC;
+var config bool SUPPRESSINGFIRE_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -275,6 +276,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(PerfectGuard());
 	Templates.AddItem(ShieldRegeneration());
 	Templates.AddItem(CalmMind());
+	Templates.AddItem(SuppressingFire());
+	Templates.AddItem(SuppressingFireAddActions());
 	
 	return Templates;
 }
@@ -3215,5 +3218,70 @@ static function X2AbilityTemplate CalmMind()
     // Activated ability that targets user
 	Template = Passive('F_CalmMind', "img:///UILibrary_XPerkIconPack.UIPerk_mind_plus", default.CALMMIND_AWC, Effect);
     
+	return Template;
+}
+
+// Suppressing Fire
+// (AbilityName="F_SuppressingFire", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// Fire a standard shot. If the shot does not kill the target, then suppress them
+static function X2AbilityTemplate SuppressingFire()
+{
+	local X2AbilityTemplate					Template;
+	local X2AbilityCost_Ammo				AmmoCost;
+	local X2AbilityCost_ActionPoints ActionPointCost;
+
+	// Start with basic attack template
+	Template = Attack('F_SuppressingFire', "img:///UILibrary_XPerkIconPack.UIPerk_suppression_shot_2", default.SUPPRESSINGFIRE_AWC, none, , eCost_WeaponConsumeAll, 0);
+	
+	// Require 3 ammo to be present so that the shot and suppression can be used
+	AmmoCost = new class'X2AbilityCost_Ammo';
+	AmmoCost.iAmmo = 3;
+	AmmoCost.bFreeCost = true;
+	Template.AbilityCosts.AddItem(AmmoCost);
+
+	// Actually charge 1 ammo for this shot. Follow-up shots will charge the extra ammo if necessary
+	AmmoCost = new class'X2AbilityCost_Ammo';
+	AmmoCost.iAmmo = 1;
+	Template.AbilityCosts.AddItem(AmmoCost);
+
+	// Now set the ability up for triggering the follow-up suppression
+	Template.PostActivationEvents.AddItem('Suppressing');
+	
+	// Add an ability that will add an action point if the target is not killed, so that suppression can actually be used
+	Template.AdditionalAbilities.AddItem('F_SuppressingFire_AddActions');
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
+	return Template;
+}
+
+static function X2AbilityTemplate SuppressingFireAddActions()
+{
+	local X2AbilityTemplate					Template;
+	local X2Effect_GrantActionPoints Effect;
+	local XMBCondition_AbilityName NameCondition;
+	
+	// Effect adds a Run and Gun action point
+	Effect = new class'X2Effect_GrantActionPoints';
+	Effect.NumActionPoints = 1;
+	Effect.PointType = class'X2CharacterTemplateManager'.default.RunAndGunActionPoint;
+	
+	// Create a triggered ability that will activate whenever the unit takes an action
+	Template = SelfTargetTrigger('F_SuppressingFire_AddActions', "img:///UILibrary_XPerkIconPack.UIPerk_suppression_shot_2", false, Effect, 'AbilityActivated', eFilter_Unit, 75);
+	
+	// Only when Suppressing Fire is used
+	NameCondition = new class'XMBCondition_AbilityName';
+	NameCondition.IncludeAbilityNames.AddItem('F_SuppressingFire');
+	AddTriggerTargetCondition(Template, NameCondition);
+
+	// Only if the target is still alive
+	AddTriggerTargetCondition(Template, default.LivingHostileUnitDisallowMindControlProperty);
+	
+	// Only if the target is still visible
+	AddTriggerTargetCondition(Template, default.GameplayVisibilityCondition);
+
+	Template.BuildVisualizationFn = none;
+
 	return Template;
 }
