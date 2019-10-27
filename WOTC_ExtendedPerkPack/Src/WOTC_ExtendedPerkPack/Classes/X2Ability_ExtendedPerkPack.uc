@@ -398,6 +398,7 @@ static function X2AbilityTemplate LikeLightning()
 	NameCondition = new class'XMBCondition_AbilityName';
 	NameCondition.IncludeAbilityNames.AddItem('RunAndGun');
 	NameCondition.IncludeAbilityNames.AddItem('LW2WotC_RunAndGun');
+	NameCondition.IncludeAbilityNames.AddItem('RunAndGun_LW');
 	AddTriggerTargetCondition(Template, NameCondition);
 
 	// Show a flyover when activated
@@ -914,7 +915,7 @@ static function X2AbilityTemplate LockNLoad()
 	local X2AbilityTemplate Template;
 	local X2Effect_ReloadPrimaryWeapon Effect;
 
-	// Create an effect that reduces all cooldowns
+	// Create an effect that restores some ammo
 	Effect = new class'X2Effect_ReloadPrimaryWeapon';
 	Effect.AmmoToReload = default.LOCKNLOAD_AMMO_TO_RELOAD;
 	
@@ -2318,6 +2319,8 @@ static function X2AbilityTemplate Havoc()
 	NameCondition = new class'XMBCondition_AbilityName';
     NameCondition.IncludeAbilityNames.AddItem('Suppression');
     NameCondition.IncludeAbilityNames.AddItem('LW2WotC_AreaSuppression');
+    NameCondition.IncludeAbilityNames.AddItem('Suppression_LW');
+    NameCondition.IncludeAbilityNames.AddItem('AreaSuppression');
 	EventListener.AbilityTargetConditions.AddItem(NameCondition);
 
 	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
@@ -3194,7 +3197,7 @@ static function X2AbilityTemplate ShieldRegeneration()
 	return Template;
 }
 
-// CalmMind
+// Calm Mind
 // (AbilityName="F_CalmMind")
 // Permanently increases your Psi Offense and Will
 static function X2AbilityTemplate CalmMind()

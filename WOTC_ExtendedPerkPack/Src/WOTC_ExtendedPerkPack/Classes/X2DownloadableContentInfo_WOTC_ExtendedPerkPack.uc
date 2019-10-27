@@ -44,6 +44,8 @@ static event OnPostTemplatesCreated()
 
     PatchAbilityForHavoc('Suppression');
     PatchAbilityForHavoc('LW2WotC_AreaSuppression');
+    PatchAbilityForHavoc('Suppression_LW');
+    PatchAbilityForHavoc('AreaSuppression');
 
     PatchAbilityForFaultlessDefense('ShieldWall');
     PatchAbilityForBolsteredWall('ShieldWall');
@@ -52,11 +54,16 @@ static event OnPostTemplatesCreated()
     
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenade');
     PatchSmokeGrenadeForCombatDrugs('SmokeGrenadeMk2');
+    PatchSmokeGrenadeForCombatDrugs('DenseSmokeGrenade');
+    PatchSmokeGrenadeForCombatDrugs('DenseSmokeGrenadeMk2');
 
     PatchSmokeGrenadeForRegenerativeMist('SmokeGrenade');
     PatchSmokeGrenadeForRegenerativeMist('SmokeGrenadeMk2');
+    PatchSmokeGrenadeForCombatDrugs('DenseSmokeGrenade');
+    PatchSmokeGrenadeForCombatDrugs('DenseSmokeGrenadeMk2');
 
 	PatchAbilityForControlledFire('LW2WotC_AreaSuppressionShot');
+	PatchAbilityForControlledFire('AreaSuppressionShot_LW');
 
 }
 

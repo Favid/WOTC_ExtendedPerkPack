@@ -5,7 +5,9 @@ simulated function int CalcAmmoCost(XComGameState_Ability Ability, XComGameState
 	local XComGameState_Unit ActivatingUnit;
 
 	ActivatingUnit = XComGameState_Unit(TargetState);
-	if (ActivatingUnit != none && ActivatingUnit.HasSoldierAbility('F_ControlledFire') && Ability.GetMyTemplateName() == 'LW2WotC_AreaSuppressionShot')
+	if (ActivatingUnit != none && 
+		ActivatingUnit.HasSoldierAbility('F_ControlledFire') && 
+		(Ability.GetMyTemplateName() == 'LW2WotC_AreaSuppressionShot' || Ability.GetMyTemplateName() == 'AreaSuppressionShot_LW'))
 	{
 		return 0;
 	}
@@ -15,7 +17,8 @@ simulated function int CalcAmmoCost(XComGameState_Ability Ability, XComGameState
 
 simulated function name CanAfford(XComGameState_Ability kAbility, XComGameState_Unit ActivatingUnit)
 {
-	if (ActivatingUnit.HasSoldierAbility('F_ControlledFire') && kAbility.GetMyTemplateName() == 'LW2WotC_AreaSuppressionShot')
+	if (ActivatingUnit.HasSoldierAbility('F_ControlledFire') && 
+		(kAbility.GetMyTemplateName() == 'LW2WotC_AreaSuppressionShot' || kAbility.GetMyTemplateName() == 'AreaSuppressionShot_LW'))
 	{
 		return 'AA_Success';
 	}
@@ -31,7 +34,8 @@ simulated function ApplyCost(XComGameStateContext_Ability AbilityContext, XComGa
 	History = `XCOMHISTORY;
 	Unit = XComGameState_Unit(History.GetGameStateForObjectID(AbilityContext.InputContext.SourceObject.ObjectID));
 
-	if (Unit.HasSoldierAbility('F_ControlledFire') && kAbility.GetMyTemplateName() == 'LW2WotC_AreaSuppressionShot')
+	if (Unit.HasSoldierAbility('F_ControlledFire') && 
+		(kAbility.GetMyTemplateName() == 'LW2WotC_AreaSuppressionShot' || kAbility.GetMyTemplateName() == 'AreaSuppressionShot_LW'))
 	{
 		return;
 	}
