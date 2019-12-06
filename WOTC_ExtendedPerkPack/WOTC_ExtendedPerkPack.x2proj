@@ -85,6 +85,9 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_PrimaryWeapon.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_UnitAffectedByMentalEffect.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Condition_UnitAffectedByPhysicalEffect.uc">
       <SubType>Content</SubType>
     </Content>

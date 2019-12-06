@@ -223,10 +223,7 @@ private static function PatchAbilityForControlledFire(name AbilityName)
 private static function PatchSuppressionForSuppressingFire()
 {
 	local X2AbilityTemplate Template;
-	local bool LwotcFound;
 	local X2AbilityTrigger_EventListener Trigger;
-	local X2AbilityCost_Ammo AmmoCost;
-	local X2AbilityCost_ActionPoints ActionPointCost;
 
 	// Look for LWOTC's version of Suppression, and use that if it's available
 	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('Suppression_LW');
@@ -513,6 +510,15 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		case 'CALMMIND_WILL':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.CALMMIND_WILL);
+			return true;
+		case 'PUTEMDOWN_AIM':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PUTEMDOWN_AIM);
+			return true;
+		case 'WILLTOSURVIVE_ARMOR':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.WILLTOSURVIVE_ARMOR);
+			return true;
+		case 'WILLTOSURVIVE_DODGE':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.WILLTOSURVIVE_DODGE);
 			return true;
 		default:
 			return false;

@@ -176,6 +176,11 @@ var config int CALMMIND_PSI;
 var config int CALMMIND_WILL;
 var config bool CALMMIND_AWC;
 var config bool SUPPRESSINGFIRE_AWC;
+var config int PUTEMDOWN_AIM;
+var config bool PUTEMDOWN_AWC;
+var config int WILLTOSURVIVE_ARMOR;
+var config int WILLTOSURVIVE_DODGE;
+var config bool WILLTOSURVIVE_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -278,6 +283,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(CalmMind());
 	Templates.AddItem(SuppressingFire());
 	Templates.AddItem(SuppressingFireAddActions());
+	Templates.AddItem(PutEmDown());
+	Templates.AddItem(WillToSurvive());
 	
 	return Templates;
 }
@@ -3228,7 +3235,6 @@ static function X2AbilityTemplate SuppressingFire()
 {
 	local X2AbilityTemplate					Template;
 	local X2AbilityCost_Ammo				AmmoCost;
-	local X2AbilityCost_ActionPoints ActionPointCost;
 
 	// Start with basic attack template
 	Template = Attack('F_SuppressingFire', "img:///UILibrary_XPerkIconPack.UIPerk_suppression_shot_2", default.SUPPRESSINGFIRE_AWC, none, , eCost_WeaponConsumeAll, 0);
@@ -3282,6 +3288,51 @@ static function X2AbilityTemplate SuppressingFireAddActions()
 	AddTriggerTargetCondition(Template, default.GameplayVisibilityCondition);
 
 	Template.BuildVisualizationFn = none;
+
+	return Template;
+}
+
+// Put 'Em Down
+// (AbilityName="F_PutEmDown")
+// Grants an aim bonus against targets that are stunned, disoriented, or panicked. Passive.
+static function X2AbilityTemplate PutEmDown()
+{
+	local XMBEffect_ConditionalBonus Effect;
+	local X2Condition_UnitAffectedByMentalEffect StatusEffectCondition;
+
+	// Create a conditional bonus
+	Effect = new class'XMBEffect_ConditionalBonus';
+
+	// The bonus adds the aim
+	Effect.AddToHitModifier(default.PUTEMDOWN_AIM, eHit_Success);
+
+    // Target must suffer from a mental status effect
+    StatusEffectCondition = new class'X2Condition_UnitAffectedByMentalEffect';
+	Effect.AbilityTargetConditions.AddItem(StatusEffectCondition);
+
+	// Create the template using a helper function
+	return Passive('F_PutEmDown', "img:///UILibrary_XPerkIconPack.UIPerk_mind_shot", default.PUTEMDOWN_AWC, Effect);
+}
+
+// Will to Survive
+// (AbilityName="F_WilltoSurvive")
+// Grants a bonus to Armor and Dodge. Passive.
+static function X2AbilityTemplate WillToSurvive()
+{
+	local X2AbilityTemplate						Template;
+	local X2Effect_PersistentStatChange			StatEffect;
+	
+	// Effect with the stat bonuses
+	StatEffect = new class'X2Effect_PersistentStatChange';
+	StatEffect.AddPersistentStatChange(eStat_ArmorMitigation, float(default.WILLTOSURVIVE_ARMOR));
+	StatEffect.AddPersistentStatChange(eStat_Dodge, float(default.WILLTOSURVIVE_DODGE));
+
+	// Create the template using a helper function
+	Template = Passive('F_WilltoSurvive', "img:///UILibrary_LW_PerkPack.LW_AbilityWilltoSurvive", default.WILLTOSURVIVE_AWC, StatEffect);
+	
+	// Show the status bonuses in the armory
+	Template.SetUIStatMarkup(class'XLocalizedData'.default.ArmorLabel, eStat_ArmorMitigation, default.WILLTOSURVIVE_ARMOR);
+	Template.SetUIStatMarkup(class'XLocalizedData'.default.DodgeLabel, eStat_Dodge, default.WILLTOSURVIVE_DODGE);
 
 	return Template;
 }
