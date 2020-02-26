@@ -67,6 +67,9 @@ static event OnPostTemplatesCreated()
 
 	PatchSuppressionForSuppressingFire();
 
+	PatchAbilityForCoordinateFire('StandardShot');
+	PatchAbilityForCoordinateFire('SniperStandardFire');
+	PatchAbilityForCoordinateFire('LightEmUp');
 }
 
 static function PatchAbilityForImposition(name AbilityName)
@@ -243,6 +246,18 @@ private static function PatchSuppressionForSuppressingFire()
 		Trigger.ListenerData.Filter = eFilter_Unit;
 		Trigger.ListenerData.EventFn = class'XComGameState_Ability'.static.AbilityTriggerEventListener_OriginalTarget;
 		Template.AbilityTriggers.AddItem(Trigger);
+	}
+}
+
+private static function PatchAbilityForCoordinateFire(name AbilityName)
+{
+	local X2AbilityTemplate Template;
+
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(AbilityName);
+
+	if (Template != none)
+	{
+		Template.AdditionalAbilities.AddItem('F_CoordinateFire_Followup');
 	}
 }
 
@@ -451,6 +466,9 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'SHOULDERTOLEANON_AIM_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHOULDERTOLEANON_AIM_BONUS);
 			return true;
+		case 'SHOULDERTOLEANON_AIM_BONUS_WITH_SHIELDWALL':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SHOULDERTOLEANON_AIM_BONUS_WITH_SHIELDWALL);
+			return true;
 		case 'BOLSTEREDWALL_DODGE_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.BOLSTEREDWALL_DODGE_BONUS);
 			return true;
@@ -519,6 +537,42 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 			return true;
 		case 'WILLTOSURVIVE_DODGE':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.WILLTOSURVIVE_DODGE);
+			return true;
+		case 'GUARD_COOLDOWN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.GUARD_COOLDOWN);
+			return true;
+		case 'SAFEGUARD_RADIUS':
+			OutString = string(int(Sqrt(class'X2Ability_ExtendedPerkPack'.default.SAFEGUARD_RADIUS)));
+			return true;
+		case 'SAFEGUARD_AIM_MODIFIER':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SAFEGUARD_AIM_MODIFIER);
+			return true;
+		case 'SAFEGUARD_AIM_MODIFIER_WITH_SHIELDWALL':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SAFEGUARD_AIM_MODIFIER_WITH_SHIELDWALL);
+			return true;
+		case 'TRADEFIRE_COOLDOWN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.TRADEFIRE_COOLDOWN);
+			return true;
+		case 'RAMPART_DAMAGE_MODIFIER':
+			OutString = string(int(class'X2Ability_ExtendedPerkPack'.default.RAMPART_DAMAGE_MODIFIER * 100));
+			return true;
+		case 'RAMPART_RADIUS':
+			OutString = string(int(Sqrt(class'X2Ability_ExtendedPerkPack'.default.RAMPART_RADIUS)));
+			return true;
+		case 'RAMPART_COOLDOWN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.RAMPART_COOLDOWN);
+			return true;
+		case 'COORDINATEFIRE_COOLDOWN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.COORDINATEFIRE_COOLDOWN);
+			return true;
+		case 'MINDBLAST_COOLDOWN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.MINDBLAST_COOLDOWN);
+			return true;
+		case 'MINDBLAST_STUN_ACTIONS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.MINDBLAST_STUN_ACTIONS);
+			return true;
+		case 'OVEREXERTION_CHARGES':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.OVEREXERTION_CHARGES);
 			return true;
 		default:
 			return false;

@@ -34,10 +34,14 @@ static function EventListenerReturn ReturnFireAOECheck(Object EventData, Object 
 	local XComGameStateContext_Ability AbilityContext;
 	local XComGameState NewGameState;
     local UnitValue                     ActivationCounterValue;
+	local name ErrorCode;
+
+	//`LOG("=== ReturnFireAOECheck");
 
 	AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
 	if (AbilityContext != none)
 	{
+		//`LOG("=== ReturnFireAOECheck 1");
 		History = `XCOMHISTORY;
 	    EffectState = XComGameState_Effect(CallbackData);
         CoveringUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
@@ -45,58 +49,85 @@ static function EventListenerReturn ReturnFireAOECheck(Object EventData, Object 
         TargetUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(AbilityContext.InputContext.PrimaryTarget.ObjectID));
 		if (AttackingUnit != none && AttackingUnit.IsEnemyUnit(CoveringUnit))
 		{
+			//`LOG("=== ReturnFireAOECheck 2");
 			CoveringFireEffect = X2Effect_ReturnFireAOE(EffectState.GetX2Effect());
 			`assert(CoveringFireEffect != none);
 
 			if (CoveringFireEffect.bOnlyDuringEnemyTurn)
 			{
+				//`LOG("=== ReturnFireAOECheck 3");
 				//  make sure it's the enemy turn if required
 				if (`TACTICALRULES.GetCachedUnitActionPlayerRef().ObjectID != AttackingUnit.ControllingPlayer.ObjectID)
+				{
 					return ELR_NoInterrupt;
+					//`LOG("=== ReturnFireAOECheck 4");
+				}
 			}
 
 			if (CoveringFireEffect.bPreEmptiveFire)
 			{
+				//`LOG("=== ReturnFireAOECheck 5");
 				//  for pre emptive fire, only process during the interrupt step
 				if (AbilityContext.InterruptionStatus != eInterruptionStatus_Interrupt)
+				{
+					//`LOG("=== ReturnFireAOECheck 6");
 					return ELR_NoInterrupt;
+				}
 			}
 			else
 			{
+				//`LOG("=== ReturnFireAOECheck 7");
 				//  for non-pre emptive fire, don't process during the interrupt step
 				if (AbilityContext.InterruptionStatus == eInterruptionStatus_Interrupt)
+				{
+					//`LOG("=== ReturnFireAOECheck 8");
 					return ELR_NoInterrupt;
+				}
 			}
 
             if (CoveringFireEffect.RequiredAllyRange > 0)
             {
+				//`LOG("=== ReturnFireAOECheck 9");
                 // do nothing if the target unit is not within the required range of the covering unit
                 if (!class'Helpers'.static.IsTileInRange(CoveringUnit.TileLocation, TargetUnit.TileLocation, CoveringFireEffect.RequiredAllyRange))
-                    return ELR_NoInterrupt;
+				{
+					//`LOG("=== ReturnFireAOECheck 10");
+					return ELR_NoInterrupt;
+				}
             }
-
 
             if (!CoveringFireEffect.bAllowSelf)
             {
+				//`LOG("=== ReturnFireAOECheck 11");
                 if (CoveringUnit.ObjectID == TargetUnit.ObjectID)
-                    return ELR_NoInterrupt;
+				{
+					//`LOG("=== ReturnFireAOECheck 12");
+					return ELR_NoInterrupt;
+				}
             }
 
 			if (CoveringFireEffect.bOnlyWhenAttackMisses)
 			{
+				//`LOG("=== ReturnFireAOECheck 13");
+
 				//  do nothing if the covering unit was not hit in the attack
 				if (class'XComGameStateContext_Ability'.static.IsHitResultHit(AbilityContext.ResultContext.HitResult))
+				{
+					//`LOG("=== ReturnFireAOECheck 14");
 					return ELR_NoInterrupt;
+				}
 			}
 
 			AbilityRef = CoveringUnit.FindAbility(CoveringFireEffect.AbilityToActivate);
 			AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityRef.ObjectID));
 			if (AbilityState != none)
 			{
+				//`LOG("=== ReturnFireAOECheck 15");
                 CoveringUnit.GetUnitValue('ReturnFireAOE_GrantsThisTurn', ActivationCounterValue);
 
 				if (CoveringFireEffect.GrantActionPoint != '' && (CoveringFireEffect.MaxPointsPerTurn > ActivationCounterValue.fValue || CoveringFireEffect.MaxPointsPerTurn <= 0))
 				{
+					//`LOG("=== ReturnFireAOECheck 16");
 					NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState(string(GetFuncName()));
 
 			        CoveringUnit.SetUnitFloatValue ('ReturnFireAOE_GrantsThisTurn', ActivationCounterValue.fValue + 1, eCleanup_BeginTurn);
@@ -104,23 +135,29 @@ static function EventListenerReturn ReturnFireAOECheck(Object EventData, Object 
 					CoveringUnit = XComGameState_Unit(NewGameState.ModifyStateObject(CoveringUnit.Class, CoveringUnit.ObjectID));
 					CoveringUnit.ReserveActionPoints.AddItem(CoveringFireEffect.GrantActionPoint);
 
-					if (AbilityState.CanActivateAbilityForObserverEvent(AttackingUnit, CoveringUnit) != 'AA_Success')
+					ErrorCode = AbilityState.CanActivateAbilityForObserverEvent(AttackingUnit, CoveringUnit);
+					if (ErrorCode != 'AA_Success')
 					{
+						//`LOG("=== ReturnFireAOECheck 17: " @ ErrorCode);
 						History.CleanupPendingGameState(NewGameState);
 					}
 					else
 					{
+						//`LOG("=== ReturnFireAOECheck 18");
 						`TACTICALRULES.SubmitGameState(NewGameState);
 
 						if (CoveringFireEffect.bUseMultiTargets)
 						{
+							//`LOG("=== ReturnFireAOECheck 19");
 							AbilityState.AbilityTriggerAgainstSingleTarget(CoveringUnit.GetReference(), true);
 						}
 						else
 						{
+							//`LOG("=== ReturnFireAOECheck 20");
 							AbilityContext = class'XComGameStateContext_Ability'.static.BuildContextFromAbility(AbilityState, AttackingUnit.ObjectID);
 							if( AbilityContext.Validate() )
 							{
+								//`LOG("=== ReturnFireAOECheck 21");
 								`TACTICALRULES.SubmitGameStateContext(AbilityContext);
 							}
 						}
@@ -128,19 +165,24 @@ static function EventListenerReturn ReturnFireAOECheck(Object EventData, Object 
 				}
 				else if (CoveringFireEffect.bSelfTargeting && AbilityState.CanActivateAbilityForObserverEvent(CoveringUnit) == 'AA_Success')
 				{
+					//`LOG("=== ReturnFireAOECheck 22");
 					AbilityState.AbilityTriggerAgainstSingleTarget(CoveringUnit.GetReference(), CoveringFireEffect.bUseMultiTargets);
 				}
 				else if (AbilityState.CanActivateAbilityForObserverEvent(AttackingUnit) == 'AA_Success')
 				{
+					//`LOG("=== ReturnFireAOECheck 23");
 					if (CoveringFireEffect.bUseMultiTargets)
 					{
+						//`LOG("=== ReturnFireAOECheck 24");
 						AbilityState.AbilityTriggerAgainstSingleTarget(CoveringUnit.GetReference(), true);
 					}
 					else
 					{
+						//`LOG("=== ReturnFireAOECheck 25");
 						AbilityContext = class'XComGameStateContext_Ability'.static.BuildContextFromAbility(AbilityState, AttackingUnit.ObjectID);
 						if( AbilityContext.Validate() )
 						{
+							//`LOG("=== ReturnFireAOECheck 26");
 							`TACTICALRULES.SubmitGameStateContext(AbilityContext);
 						}
 					}
@@ -148,6 +190,7 @@ static function EventListenerReturn ReturnFireAOECheck(Object EventData, Object 
 			}
 		}
 	}
+	//`LOG("=== ReturnFireAOECheck 27");
 	return ELR_NoInterrupt;
 }
 

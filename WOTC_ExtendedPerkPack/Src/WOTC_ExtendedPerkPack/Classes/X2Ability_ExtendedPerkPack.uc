@@ -127,6 +127,7 @@ var config bool HAVOC_AWC;
 var config bool FINESSE_AWC;
 var config int SHOULDERTOLEANON_RADIUS;
 var config int SHOULDERTOLEANON_AIM_BONUS;
+var config int SHOULDERTOLEANON_AIM_BONUS_WITH_SHIELDWALL;
 var config bool SHOULDERTOLEANON_AWC;
 var config int BOLSTEREDWALL_DODGE_BONUS;
 var config bool BOLSTEREDWALL_AWC;
@@ -181,6 +182,39 @@ var config bool PUTEMDOWN_AWC;
 var config int WILLTOSURVIVE_ARMOR;
 var config int WILLTOSURVIVE_DODGE;
 var config bool WILLTOSURVIVE_AWC;
+var config bool WATCHFULEYE_AWC;
+var config int GUARD_COOLDOWN;
+var config bool GUARD_AWC;
+var config int SAFEGUARD_RADIUS;
+var config int SAFEGUARD_AIM_MODIFIER;
+var config int SAFEGUARD_AIM_MODIFIER_WITH_SHIELDWALL;
+var config bool SAFEGUARD_AWC;
+var config int TRADEFIRE_COOLDOWN;
+var config bool TRADEFIRE_AWC;
+var config int INTIMIDATE_TIER1_STRENGTH;
+var config int INTIMIDATE_TIER2_STRENGTH;
+var config int INTIMIDATE_TIER3_STRENGTH;
+var config bool INTIMIDATE_AWC;
+var config float RAMPART_DAMAGE_MODIFIER;
+var config int RAMPART_RADIUS;
+var config int RAMPART_COOLDOWN;
+var config bool RAMPART_AWC;
+var config bool STRONGBACK_AWC;
+var config int COORDINATEFIRE_COOLDOWN;
+var config int COORDINATEFIRE_RADIUS;
+var config bool COORDINATEFIRE_AWC;
+var config int PACKTACTICS_RADIUS;
+var config bool PACKTACTICS_AWC;
+var config int PARRY_COUNTERATTACK_DODGE;
+var config bool PARRY_AWC;
+var config int MINDBLAST_COOLDOWN;
+var config int MINDBLAST_STUN_ACTIONS;
+var config bool MINDBLAST_AWC;
+var config bool SENSEPANIC_AWC;
+var config int OVEREXERTION_CHARGES;
+var config int OVEREXERTION_COOLDOWN;
+var config bool OVEREXERTION_AWC;
+var config bool RIOTCONTROL_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -285,7 +319,30 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(SuppressingFireAddActions());
 	Templates.AddItem(PutEmDown());
 	Templates.AddItem(WillToSurvive());
-	
+	Templates.AddItem(WatchfulEye());
+	Templates.AddItem(Guard());
+	Templates.AddItem(GuardActivate());
+	Templates.AddItem(TradeFire());
+	Templates.AddItem(TradeFireShot());
+	Templates.AddItem(Safeguard());
+	Templates.AddItem(SafeguardPassive());
+	Templates.AddItem(Intimidate());
+	Templates.AddItem(IntimidateTrigger());
+	Templates.AddItem(Rampart());
+	Templates.AddItem(StrongBack());
+	Templates.AddItem(CoordinateFire());
+	Templates.AddItem(CoordinateFirePassive());
+	Templates.AddItem(CoordinateFireFollowup());
+	Templates.AddItem(PackTactics());
+	Templates.AddItem(ParryAttack());
+	Templates.AddItem(ParryPreparation());
+	Templates.AddItem(ParryCounterattack());
+	Templates.AddItem(Parry());
+	Templates.AddItem(MindBlast());
+	Templates.AddItem(SensePanic());
+	Templates.AddItem(OverExertion());
+	Templates.AddItem(RiotControl());
+
 	return Templates;
 }
 
@@ -294,7 +351,7 @@ static function X2AbilityTemplate ShootAnyone()
 {
 	local X2AbilityTemplate Template;
 	local X2Condition_Visibility            VisibilityCondition;
-    local X2Effect_Persistent DisorientedEffect;
+    //local X2Effect_Persistent DisorientedEffect;
 
 	// Create a standard attack that doesn't cost an action.
 	Template = Attack('F_ShootAnyone', "img:///UILibrary_LW_PerkPack.LW_Ability_WalkingFire", false, none, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_Free, 1);
@@ -307,8 +364,8 @@ static function X2AbilityTemplate ShootAnyone()
 	Template.AbilityTargetConditions.AddItem(VisibilityCondition);
 	Template.AbilityTargetConditions.AddItem(default.LivingTargetOnlyProperty);
 
-    DisorientedEffect = class'X2StatusEffects'.static.CreateUnconsciousStatusEffect();
-    Template.AddTargetEffect(DisorientedEffect);
+    //DisorientedEffect = class'X2StatusEffects'.static.CreateUnconsciousStatusEffect();
+    //Template.AddTargetEffect(DisorientedEffect);
 
 	return Template;
 }
@@ -1789,6 +1846,10 @@ static function X2AbilityTemplate BlindingFire()
 	Template.AddMultiTargetEffect(WeaponDamageEffect);
 	Template.bFragileDamageOnly = true;
 	Template.bCheckCollision = true;
+	
+	// Add miss target damage
+	Template.AddTargetEffect(default.WeaponUpgradeMissDamage);
+	Template.AddMultiTargetEffect(default.WeaponUpgradeMissDamage);
 
     // Reduces the targets' aim
 	AimPenaltyEffect = new class'X2Effect_PersistentStatChange';
@@ -2384,7 +2445,7 @@ static function X2AbilityTemplate Finesse()
 
 // Shoulder to Lean On
 // (AbilityName="F_ShoulderToLeanOn")
-// Allies in a small radius around you gain bonus Aim.
+// Allies in a small radius around you gain bonus Aim. This bonus is increased when Shield Wall is used.
 static function X2AbilityTemplate ShoulderToLeanOn()
 {
 	local X2AbilityTemplate             Template;
@@ -2403,8 +2464,10 @@ static function X2AbilityTemplate ShoulderToLeanOn()
 	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
 
 	Effect = new class'X2Effect_ToHitBonusAOE';
+	Effect.EffectName = 'F_ShoulderToLeanOn';
 	Effect.BuildPersistentEffect(1, true, false);
 	Effect.ToHitBonus = default.SHOULDERTOLEANON_AIM_BONUS;
+	Effect.ToHitBonusWithShieldWall = default.SHOULDERTOLEANON_AIM_BONUS_WITH_SHIELDWALL;
 	Effect.AOEDistanceSquared = default.SHOULDERTOLEANON_RADIUS;
     Effect.IncludeOwner = false;
 	Effect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
@@ -3182,7 +3245,7 @@ static function X2AbilityTemplate ShieldRegeneration()
 	local X2Effect_PersistentStatChange			Effect;
 	local X2Condition_UnitStatCheck				UnitStatCheckCondition;
 
-    // Activated ability that targets user
+    // Triggered ability that activates at the start of eaech player turn that targets owner
 	Template = SelfTargetTrigger('F_ShieldRegeneration', "img:///UILibrary_XPerkIconPack.UIPerk_shield_cycle", default.SHIELDREGENERATION_AWC, none, 'PlayerTurnBegun', eFilter_Player);
 
     // Create the bonus effect
@@ -3333,6 +3396,900 @@ static function X2AbilityTemplate WillToSurvive()
 	// Show the status bonuses in the armory
 	Template.SetUIStatMarkup(class'XLocalizedData'.default.ArmorLabel, eStat_ArmorMitigation, default.WILLTOSURVIVE_ARMOR);
 	Template.SetUIStatMarkup(class'XLocalizedData'.default.DodgeLabel, eStat_Dodge, default.WILLTOSURVIVE_DODGE);
+
+	return Template;
+}
+
+// Watchful Eye
+// (AbilityName="F_WatchfulEye", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// You get a free overwatch shot when any target you have holotargeted moves or attacks.
+static function X2AbilityTemplate WatchfulEye()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityTrigger_Event Trigger;
+	local X2Condition_UnitEffects Condition;
+	local X2Condition_UnitProperty ShooterCondition;
+	local X2Effect_Persistent MarkEffect;
+	local X2AbilityToHitCalc_StandardAim ToHitCalc;
+
+	// Create the template with a helper function
+	Template = Attack('F_WatchfulEye', "img:///UILibrary_SOHunter.UIPerk_watchfuleye", default.WATCHFULEYE_AWC,,, eCost_None);
+	HidePerkIcon(Template);
+	AddIconPassive(Template);
+
+	// Remove input trigger
+	Template.AbilityTriggers.Length = 0;
+
+	// Trigger when observing movement
+	Trigger = new class'X2AbilityTrigger_Event';
+	Trigger.EventObserverClass = class'X2TacticalGameRuleset_MovementObserver';
+	Trigger.MethodName = 'InterruptGameState';
+	Template.AbilityTriggers.AddItem(Trigger);
+
+	// Trigger when observing an attack
+	Trigger = new class'X2AbilityTrigger_Event';
+	Trigger.EventObserverClass = class'X2TacticalGameRuleset_AttackObserver';
+	Trigger.MethodName = 'InterruptGameState';
+	Template.AbilityTriggers.AddItem(Trigger);
+
+	// Add standard overwatch effect conditions
+	Template.AbilityTargetConditions.AddItem(class'X2Ability_DefaultAbilitySet'.static.OverwatchTargetEffectsCondition());
+
+	// Can only fire on each target once per turn
+	MarkEffect = new class'X2Effect_Persistent';
+	MarkEffect.EffectName = 'F_WatchfulEye_Cooldown';
+	MarkEffect.BuildPersistentEffect(1, false, false, true, eGameRule_PlayerTurnEnd);
+	MarkEffect.bApplyOnHit = true;
+	MarkEffect.bApplyOnMiss = true;
+	Template.AddTargetEffect(MarkEffect);
+
+	// Has to be holotargeted by you, couldn't have been shot at yet by you
+	Condition = new class'X2Condition_UnitEffectsWithAbilitySource';
+	Condition.AddRequireEffect('LWHoloTarget', 'AA_Immune');
+	Condition.AddExcludeEffect(MarkEffect.EffectName, 'AA_Immune');
+	Template.AbilityTargetConditions.AddItem(Condition);
+
+	// Don't shoot while concealed
+	ShooterCondition = new class'X2Condition_UnitProperty';
+	ShooterCondition.ExcludeConcealed = true;
+	Template.AbilityShooterConditions.AddItem(ShooterCondition);
+
+	// Standard aim calculation for reaction shots
+	ToHitCalc = new class'X2AbilityToHitCalc_StandardAim';
+	ToHitCalc.bReactionFire = true;
+	Template.AbilityToHitCalc = ToHitCalc;
+
+	return Template;
+}
+
+// Guard
+// (AbilityName="F_Guard", ApplyToWeaponSlot=eInvSlot_SecondaryWeapon)
+// Block the first attack made against you until next turn
+static function X2AbilityTemplate Guard()
+{
+	local X2AbilityTemplate						Template;
+	local X2Effect_Persistent                   Effect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Guard');
+
+	// Boilerplate setup for this passive ability
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.IconImage = "img:///UILibrary_XPACK_Common.PerkIcons.UIPerk_parry";
+	
+	// Add the active ability that grants the Guard effect
+	Template.AdditionalAbilities.AddItem('F_Guard_Activate');
+
+	// Targets self, always works
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+
+	// The effect that blocks the first attack once F_Guard_Activate is used
+	Effect = new class'X2Effect_Parry';
+	Effect.BuildPersistentEffect(1, true, false);
+	Effect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.GetMyHelpText(), Template.IconImage, true, , Template.AbilitySourceName);
+	Template.AddTargetEffect(Effect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = none;
+
+	Template.bCrossClassEligible = default.GUARD_AWC;
+
+	return Template;
+}
+
+// Activated ability that grants the Guard effect
+static function X2AbilityTemplate GuardActivate()
+{
+	local X2AbilityTemplate						Template;
+	local X2Effect_IncrementUnitValue			ParryUnitValue;
+	local X2AbilityCost_ActionPoints			ActionPointCost;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Guard_Activate');
+
+	Template.bFrameEvenWhenUnitIsHidden = true;
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_ShowIfAvailable;
+	Template.Hostility = eHostility_Offensive;
+	Template.IconImage = "img:///UILibrary_XPACK_Common.PerkIcons.UIPerk_Parry";
+	Template.AbilityConfirmSound = "TacticalUI_ActivateAbility";
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+ 	Template.AddShooterEffectExclusions();
+
+	// Costs one action and ends the turn
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.iNumPoints = 1;
+	ActionPointCost.bConsumeAllPoints = true;
+	Template.AbilityCosts.AddItem(ActionPointCost);
+
+	// Cooldown
+	AddCooldown(Template, default.GUARD_COOLDOWN);
+
+	ParryUnitValue = new class'X2Effect_IncrementUnitValue';
+	ParryUnitValue.NewValueToSet = 1;
+	ParryUnitValue.UnitName = 'Parry';
+	ParryUnitValue.CleanupType = eCleanup_BeginTurn;
+	Template.AddShooterEffect(ParryUnitValue);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.BuildInterruptGameStateFn = TypicalAbility_BuildInterruptGameState;
+	Template.bSkipFireAction = true;
+	
+	// No animation for now
+	Template.bShowActivation = false;
+
+	return Template;
+}
+
+// Safeguard
+// (AbilityName="F_Safeguard")
+// Allies in a small radius around you gain bonus Defense. This bonus is increased when Shield Wall is used.
+static function X2AbilityTemplate Safeguard()
+{
+	local X2AbilityTemplate					Template;
+	local X2Effect_ToHitAsTargetBonusAOE    Effect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Safeguard');
+
+	Template.IconImage = "img:///UILibrary_XPerkIconPack.UIPerk_shield_defense";
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+
+	Effect = new class'X2Effect_ToHitAsTargetBonusAOE';
+	Effect.EffectName = 'F_Safeguard';
+	Effect.BuildPersistentEffect(1, true, false);
+	Effect.ToHitAsTargetBonus = default.SAFEGUARD_AIM_MODIFIER;
+	Effect.ToHitAsTargetBonusWithShieldWall = default.SAFEGUARD_AIM_MODIFIER_WITH_SHIELDWALL;
+	Effect.AOEDistanceSquared = default.SAFEGUARD_RADIUS;
+    Effect.IncludeOwner = false;
+	Effect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
+	Template.AddMultiTargetEffect(Effect);
+
+	Template.bSkipFireAction = true;
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	Template.AdditionalAbilities.AddItem('F_Safeguard_Passive');
+
+	Template.bCrossClassEligible = default.SAFEGUARD_AWC;
+	
+	return Template;
+}
+
+static function X2AbilityTemplate SafeguardPassive()
+{
+	return PurePassive('F_Safeguard_Passive', "img:///UILibrary_XPerkIconPack.UIPerk_shield_defense", , 'eAbilitySource_Perk');
+}
+
+// Trade Fire
+// (AbilityName="F_TradeFire", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// Until the start of next turn, fire at any enemy that takes a hostile action.
+static function X2AbilityTemplate TradeFire()
+{
+	local X2AbilityTemplate						Template;
+	local X2Effect_ReturnFireAOE                FireEffect;
+	
+	// Activated ability that targets user
+	Template = SelfTargetActivated('F_TradeFire', "img:///UILibrary_XPerkIconPack.UIPerk_rifle_circle", default.TRADEFIRE_AWC, none, , eCost_SingleConsumeAll);
+	Template.bShowActivation = true;
+
+	// The granted effect that lets the user return fire on any enemy
+	FireEffect = new class'X2Effect_ReturnFireAOE';
+    FireEffect.bAllowSelf = true;
+	FireEffect.AbilityToActivate = 'F_TradeFire_Shot';
+	FireEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
+	FireEffect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage,,,Template.AbilitySourceName);
+	Template.AddTargetEffect(FireEffect);
+	
+	// The shot taken
+	Template.AdditionalAbilities.AddItem('F_TradeFire_Shot');
+
+	// Cooldown
+    AddCooldown(Template, default.TRADEFIRE_COOLDOWN);
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
+	return Template;
+}
+
+// The shot taken for Trade Fire
+static function X2AbilityTemplate TradeFireShot()
+{
+	local X2AbilityTemplate                 Template;
+	local X2AbilityCost_ReserveActionPoints	ReserveActionPointCost;
+	local X2Effect_ApplyWeaponDamage		MissDamage;
+	local X2Condition_Visibility			TargetVisibilityCondition;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_TradeFire_Shot');
+	class'X2Ability_DefaultAbilitySet'.static.PistolOverwatchShotHelper(Template);
+
+	Template.IconImage = "img:///UILibrary_XPerkIconPack.UIPerk_rifle_circle";
+	Template.bShowPostActivation = true;
+	Template.bFrameEvenWhenUnitIsHidden = true;
+	
+	Template.AbilityCosts.Length = 0;
+	ReserveActionPointCost = new class'X2AbilityCost_ReserveActionPoints';
+	ReserveActionPointCost.iNumPoints = 1;
+	ReserveActionPointCost.AllowedTypes.AddItem(class'X2CharacterTemplateManager'.default.ReturnFireActionPoint);
+	Template.AbilityCosts.AddItem(ReserveActionPointCost);
+
+	MissDamage = new class'X2Effect_ApplyWeaponDamage';
+	MissDamage.bApplyOnHit = false;
+	MissDamage.bApplyOnMiss = true;
+	MissDamage.bIgnoreBaseDamage = true;
+	MissDamage.DamageTag = 'Miss';
+	MissDamage.bAllowWeaponUpgrade = true;
+	MissDamage.bAllowFreeKill = false;
+	Template.AddTargetEffect(MissDamage);
+	
+	Template.AbilityTargetConditions.Length = 0;
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileUnitDisallowMindControlProperty);	
+	TargetVisibilityCondition = new class'X2Condition_Visibility';
+	TargetVisibilityCondition.bRequireGameplayVisible = true;
+	TargetVisibilityCondition.bRequireBasicVisibility = true;
+	Template.AbilityTargetConditions.AddItem(TargetVisibilityCondition);
+	Template.AbilityTargetConditions.AddItem(class'X2Ability_DefaultAbilitySet'.static.OverwatchTargetEffectsCondition());
+
+	return Template;
+}
+
+// Intimidate
+// (AbilityName="F_Intimidate")
+// When targeted by an attack, the enemy has a chance to panic.
+static function X2AbilityTemplate Intimidate()
+{
+	local X2AbilityTemplate						Template;
+	local X2Effect_CoveringFire                 CoveringEffect;
+
+	Template = PurePassive('F_Intimidate', "img:///UILibrary_DLC3Images.UIPerk_spark_intimidate", default.INTIMIDATE_AWC, 'eAbilitySource_Perk', true);
+
+	CoveringEffect = new class'X2Effect_CoveringFire';
+	CoveringEffect.BuildPersistentEffect(1, true, false, false);
+	CoveringEffect.AbilityToActivate = 'F_IntimidateTrigger';
+	CoveringEffect.GrantActionPoint = 'intimidate';
+	CoveringEffect.bPreEmptiveFire = false;
+	CoveringEffect.bDirectAttackOnly = true;
+	CoveringEffect.bOnlyDuringEnemyTurn = true;
+	CoveringEffect.bUseMultiTargets = false;
+	CoveringEffect.EffectName = 'IntimidateWatchEffect';
+	Template.AddTargetEffect(CoveringEffect);
+
+	Template.AdditionalAbilities.AddItem('F_IntimidateTrigger');
+
+	return Template;
+}
+
+// The ability that is triggered when you are attacked
+static function X2AbilityTemplate IntimidateTrigger()
+{
+	local X2AbilityTemplate						Template;
+	local X2Effect_Panicked						PanicEffect;
+	local X2AbilityCost_ReserveActionPoints     ActionPointCost;
+	local X2Condition_UnitEffects               UnitEffects;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_IntimidateTrigger');
+
+	Template.IconImage = "img:///UILibrary_DLC3Images.UIPerk_spark_intimidate";
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Offensive;
+
+	ActionPointCost = new class'X2AbilityCost_ReserveActionPoints';
+	ActionPointCost.iNumPoints = 1;
+	ActionPointCost.AllowedTypes.Length = 0;
+	ActionPointCost.AllowedTypes.AddItem('intimidate');
+	Template.AbilityCosts.AddItem(ActionPointCost);
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	UnitEffects = new class'X2Condition_UnitEffects';
+	UnitEffects.AddExcludeEffect(class'X2AbilityTemplateManager'.default.StunnedName, 'AA_UnitIsStunned');
+	Template.AbilityShooterConditions.AddItem(UnitEffects);
+
+	Template.AbilityToHitCalc = default.DeadEye;                //  the real roll is in the effect apply chance
+	Template.AbilityTargetStyle = default.SelfTarget;
+
+	Template.AbilityTriggers.AddItem(new class'X2AbilityTrigger_Placeholder');
+
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileUnitDisallowMindControlProperty);
+
+	PanicEffect = class'X2StatusEffects'.static.CreatePanickedStatusEffect();
+	PanicEffect.ApplyChanceFn = IntimidationApplyChance;
+	PanicEffect.VisualizationFn = class'X2Ability_SparkAbilitySet'.static.Intimidate_Visualization;
+	Template.AddTargetEffect(PanicEffect);
+
+	Template.CustomFireAnim = 'NO_Intimidate';
+	Template.bShowActivation = true;
+	Template.CinescriptCameraType = "Spark_Intimidate";
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	Template.bFrameEvenWhenUnitIsHidden = true;
+
+	return Template;
+}
+
+// Chance to apply Intimidate - similar to the Spark's Intimidate, except it's based on secondary weapon tier instead of Spark Armor tier
+function name IntimidationApplyChance(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState)
+{
+	//  this mimics the panic hit roll without actually BEING the panic hit roll
+	local XComGameState_Unit TargetUnit, SourceUnit;
+	local name ImmuneName;
+	local int AttackVal, DefendVal, TargetRoll, RandRoll;
+	local XComGameState_Item WeaponState;
+	local X2WeaponTemplate WeaponTemplate;
+	local bool bFoundTemplate;
+
+	SourceUnit = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.SourceStateObjectRef.ObjectID));
+	if (SourceUnit == none)
+		SourceUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(ApplyEffectParameters.SourceStateObjectRef.ObjectID));
+	if (SourceUnit != none)
+	{
+		WeaponState = SourceUnit.GetItemInSlot(eInvSlot_SecondaryWeapon, NewGameState);
+		if (WeaponState != none)
+		{
+			WeaponTemplate = X2WeaponTemplate(WeaponState.GetMyTemplate());
+			if (WeaponTemplate != none)
+			{
+				bFoundTemplate = true;
+			}
+		}
+	}
+
+	if (!bFoundTemplate)
+	{
+		return 'AA_WeaponIncompatible';
+	}
+
+	TargetUnit = XComGameState_Unit(kNewTargetState);
+	if (TargetUnit != none && WeaponTemplate != none)
+	{
+		foreach class'X2AbilityToHitCalc_PanicCheck'.default.PanicImmunityAbilities(ImmuneName)
+		{
+			if (TargetUnit.FindAbility(ImmuneName).ObjectID != 0)
+			{
+				return 'AA_UnitIsImmune';
+			}
+		}
+
+		if (WeaponTemplate.Tier == 2 || WeaponTemplate.Tier == -2)
+		{
+			AttackVal = default.INTIMIDATE_TIER2_STRENGTH;
+		}
+		else if (WeaponTemplate.Tier == 3 || WeaponTemplate.Tier == -3)
+		{
+			AttackVal = default.INTIMIDATE_TIER3_STRENGTH;
+		}
+		else
+		{
+			AttackVal = default.INTIMIDATE_TIER1_STRENGTH;
+		}
+
+		DefendVal = TargetUnit.GetCurrentStat(eStat_Will);
+		TargetRoll = class'X2AbilityToHitCalc_PanicCheck'.default.BaseValue + AttackVal - DefendVal;
+		RandRoll = `SYNC_RAND(100);
+		if (RandRoll < TargetRoll)
+			return 'AA_Success';
+	}
+
+	return 'AA_EffectChanceFailed';
+}
+
+// Rampart
+// (AbilityName="F_Rampart")
+// Activated ability that grants damage reduction to the user and adjacent allies
+static function X2AbilityTemplate Rampart()
+{
+    local X2Effect_DamageReductionAOE			Effect;
+	local X2AbilityTemplate                     Template;
+    local X2Condition_UnitProperty              Condition;
+	local X2AbilityMultiTarget_AllAllies		MultiTargetStyle;
+    
+    // Activated ability that targets user
+	Template = SelfTargetActivated('F_Rampart', "img:///UILibrary_XPerkIconPack.UIPerk_shield_defense2", default.RAMPART_AWC, none, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_Free);
+	
+	// Targets self and nearby allies
+	MultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+	MultiTargetStyle.bAllowSameTarget = true;
+	Template.AbilityMultiTargetStyle = MultiTargetStyle;
+	
+	// Damage reduction applies to the user and allies around them
+	Effect = new class'X2Effect_DamageReductionAOE';
+	Effect.EffectName = 'F_Rampart';
+	Effect.BuildPersistentEffect(1, true, false);
+	Effect.DamageReduction = default.RAMPART_DAMAGE_MODIFIER;
+	Effect.AOEDistanceSquared = default.RAMPART_RADIUS;
+    Effect.IncludeOwner = true;
+	Effect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
+	Template.AddMultiTargetEffect(Effect);
+
+    // Only affects living allies
+	Condition = new class'X2Condition_UnitProperty';
+	Condition.RequireWithinRange = true;
+	Condition.ExcludeHostileToSource = true;
+	Condition.ExcludeFriendlyToSource = false;
+	Condition.ExcludeDead = true; 
+	Template.AbilityMultiTargetConditions.AddItem(Condition);
+    
+	// Cooldown
+	AddCooldown(Template, default.RAMPART_COOLDOWN);
+
+	// Show a flyover when activated
+	Template.bShowActivation = true;
+
+    // Do a pointing animation
+	Template.CustomFireAnim = 'HL_SignalPoint';
+    Template.bSkipFireAction = false;
+
+	return Template;
+}
+
+// Strong Back
+// (AbilityName="F_StrongBack")
+// Reduces the mobility penalty for each weighted utility item by one. Passive.
+static function X2AbilityTemplate StrongBack()
+{
+	local X2Effect_ReverseUtilityMobilityPenalites Effect;
+	
+	// This effect will grant +1 Mobility for each equipped utility item that grants -1 Mobility
+	Effect = new class'X2Effect_ReverseUtilityMobilityPenalites';
+	Effect.EffectName = 'F_StrongBack';
+	Effect.SlotsToCheck.AddItem(eInvSlot_AmmoPocket);
+	Effect.SlotsToCheck.AddItem(eInvSlot_GrenadePocket);
+	Effect.SlotsToCheck.AddItem(eInvSlot_Utility);
+
+	// Create the template using a helper function
+	return Passive('F_StrongBack', "img:///UILibrary_XPerkIconPack.UIPerk_star_box", default.STRONGBACK_AWC, Effect);
+}
+
+// Coordinate Fire
+// (AbilityName="F_CoordinateFire", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// Fire at the target, then all adjacent allies will fire at that target.
+static function X2AbilityTemplate CoordinateFire()
+{
+	local X2AbilityTemplate Template;
+
+	// Create a standard attack
+	Template = Attack('F_CoordinateFire', "img:///UILibrary_XPerkIconPack.UIPerk_shot_x2", default.COORDINATEFIRE_AWC, none, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_WeaponConsumeAll, 1);
+	
+	// Event that fires telling allies to shoot
+	Template.PostActivationEvents.AddItem('CoordinateFireFollowup');
+
+	// Passive ability that lets allies listen to the event
+	Template.AdditionalAbilities.AddItem('F_CoordinateFire_Passive');
+	
+    // Cooldown
+	AddCooldown(Template, default.COORDINATEFIRE_COOLDOWN);
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
+	return Template;
+}
+
+// The passive partial ability allowing allies to followup your shots
+static function X2AbilityTemplate CoordinateFirePassive()
+{
+	local X2AbilityTemplate			Template;
+	local X2Effect_CoordinateFire_Passive		Effect;
+
+	// Effect granting the ability to listen to the CoordinateFire event
+	Effect = new class'X2Effect_CoordinateFire_Passive';
+	Effect.Radius = default.COORDINATEFIRE_RADIUS;
+
+	// Create the template using a helper function
+	Template = Passive('F_CoordinateFire_Passive', "img:///UILibrary_XPerkIconPack.UIPerk_shot_x2", true, none);
+	
+	// Grants this effect to all allies on the mission
+	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+	Template.AddMultiTargetEffect(Effect);
+	
+	// The Coordinate Fire ability will show up as an active ability, so hide the icon for the passive effect
+	HidePerkIcon(Template);
+
+	return Template;
+}
+
+// This ability is added to all primary weapons, and is the followup ability performed
+static function X2AbilityTemplate CoordinateFireFollowup()
+{
+	local X2AbilityTemplate Template;
+
+	// Create a standard attack that does not require an action point
+	Template = Attack('F_CoordinateFire_Followup', "img:///UILibrary_XPerkIconPack.UIPerk_shot_x2", false, none, , eCost_Free, 1);
+	
+	// We don't want this ability to actually show up to the user
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+
+	// Show a flyover for each follow-up shot
+	Template.bShowActivation = true;
+
+	// Remove the activate ability trigger added by the Attack helper function
+	Template.AbilityTriggers.Length = 0;
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_PrimaryWeapon;
+
+	return Template;
+}
+
+// Pack Tactics
+// (AbilityName="F_PackTactics")
+// If Shield Wall is active, then all adjacent allies will enter overwatch at the end of the turn.
+static function X2AbilityTemplate PackTactics()
+{
+	local X2AbilityTemplate			Template;
+	local X2Effect_PackTactics		Effect;
+
+	// Effect granting the ability to listen to the CoordinateFire event
+	Effect = new class'X2Effect_PackTactics';
+	Effect.Radius = default.PACKTACTICS_RADIUS;
+
+	// Create the template using a helper function
+	Template = Passive('F_PackTactics', "img:///UILibrary_XPerkIconPack.UIPerk_overwatch_defense2", true, none);
+	
+	// Grants this effect to all allies on the mission
+	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+	Template.AddMultiTargetEffect(Effect);
+
+	return Template;
+}
+
+// Parry
+// (AbilityName="F_Parry", ApplyToWeaponSlot=eInvSlot_SecondaryWeapon)
+// You may parry melee attacks and counterattack with a Shield Bash.
+static function X2AbilityTemplate Parry()
+{
+	local X2AbilityTemplate                 Template;
+
+	Template = PurePassive('F_Parry', "img:///UILibrary_LW_Overhaul.LW_AbilityCombatives", default.PARRY_AWC, 'eAbilitySource_Perk');
+	Template.AdditionalAbilities.AddItem('F_Parry_Attack');
+	Template.AdditionalAbilities.AddiTEm('F_Parry_Preparation');
+	Template.AdditionalAbilities.AddItem('F_Parry_Counterattack');
+	return Template;
+}
+
+// The attack used for the counter
+static function X2AbilityTemplate ParryAttack()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityCost_ActionPoints ActionPointCost;
+	local X2AbilityToHitCalc_StandardMelee MeleeHitCalc;
+	local X2Effect_ApplyWeaponDamage PhysicalDamageEffect;
+	local X2Effect_SetUnitValue SetUnitValEffect;
+	local X2Effect_RemoveEffects RemoveEffects;
+	local X2Condition_AbilityProperty StunCondition;
+	local X2Effect_Stunned StunEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Parry_Attack');
+	Template.IconImage = "img:///UILibrary_LW_Overhaul.LW_Ability_Combatives";
+
+	Template.AbilitySourceName = 'eAbilitySource_Standard';
+	Template.Hostility = eHostility_Offensive;
+
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.iNumPoints = 1;
+
+	ActionPointCost.AllowedTypes.AddItem(class'X2CharacterTemplateManager'.default.CounterattackActionPoint);
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.bDontDisplayInAbilitySummary = true;
+
+	ActionPointCost.bConsumeAllPoints = true;
+	Template.AbilityCosts.AddItem(ActionPointCost);
+
+	MeleeHitCalc = new class'X2AbilityToHitCalc_StandardMelee';
+	Template.AbilityToHitCalc = MeleeHitCalc;
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileTargetProperty);
+	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
+
+	// Damage Effect
+	PhysicalDamageEffect = new class'X2Effect_ApplyWeaponDamage';
+	Template.AddTargetEffect(PhysicalDamageEffect);
+	
+	// Disorient Effect
+	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateDisorientedStatusEffect(true, , false));
+	
+	// Stun Effect (if the unit has Shield Trauma)
+	StunEffect = class'X2StatusEffects'.static.CreateStunnedStatusEffect(1, 100, false);
+	StunCondition = new class'X2Condition_AbilityProperty';
+	StunCondition.OwnerHasSoldierAbilities.AddItem('F_ShieldTrauma');
+	StunEffect.TargetConditions.AddItem(StunCondition);
+	Template.AddTargetEffect(StunEffect);
+
+	// The Unit gets to counterattack once
+	SetUnitValEffect = new class'X2Effect_SetUnitValue';
+	SetUnitValEffect.UnitName = class'X2Ability'.default.CounterattackDodgeEffectName;
+	SetUnitValEffect.NewValueToSet = 0;
+	SetUnitValEffect.CleanupType = eCleanup_BeginTurn;
+	SetUnitValEffect.bApplyOnHit = true;
+	SetUnitValEffect.bApplyOnMiss = true;
+	Template.AddShooterEffect(SetUnitValEffect);
+
+	// Remove the dodge increase (happens with a counter attack, which is one time per turn)
+	RemoveEffects = new class'X2Effect_RemoveEffects';
+	RemoveEffects.EffectNamesToRemove.AddItem(class'X2Ability'.default.CounterattackDodgeEffectName);
+	RemoveEffects.bApplyOnHit = true;
+	RemoveEffects.bApplyOnMiss = true;
+	Template.AddShooterEffect(RemoveEffects);
+
+	Template.AbilityTargetStyle = default.SimpleSingleMeleeTarget;
+
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	Template.CinescriptCameraType = "Ranger_Reaper";
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
+
+	return Template;
+}
+
+// Grants the passive dodge bonus during the enemy turn to increase the odds of Parry activating
+static function X2AbilityTemplate ParryPreparation()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityTrigger_EventListener Trigger;
+	local X2Effect_ToHitModifier DodgeEffect;
+	local X2Effect_SetUnitValue SetUnitValEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Parry_Preparation');
+
+	Template.bDontDisplayInAbilitySummary = true;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+
+	Trigger = new class'X2AbilityTrigger_EventListener';
+	Trigger.ListenerData.Deferral = ELD_OnStateSubmitted;
+	Trigger.ListenerData.EventID = 'PlayerTurnEnded';
+	Trigger.ListenerData.Filter = eFilter_Player;
+	Trigger.ListenerData.EventFn = class'XComGameState_Ability'.static.AbilityTriggerEventListener_Self;
+	Template.AbilityTriggers.AddItem(Trigger);
+	Template.AbilityTriggers.AddItem(new class'X2AbilityTrigger_UnitPostBeginPlay');
+
+	// During the Enemy player's turn, the Unit gets a dodge increase
+	DodgeEffect = new class'X2Effect_ToHitModifier';
+	DodgeEffect.EffectName = class'X2Ability'.default.CounterattackDodgeEffectName;
+	DodgeEffect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnBegin);
+	DodgeEffect.AddEffectHitModifier(eHit_Graze, default.PARRY_COUNTERATTACK_DODGE, "Parried", class'X2AbilityToHitCalc_StandardMelee', true, false, true, true, , false);
+	DodgeEffect.bApplyAsTarget = true;
+	Template.AddShooterEffect(DodgeEffect);
+
+	// The Unit gets to counterattack once
+	SetUnitValEffect = new class'X2Effect_SetUnitValue';
+	SetUnitValEffect.UnitName = class'X2Ability'.default.CounterattackDodgeEffectName;
+	SetUnitValEffect.NewValueToSet = class'X2Ability'.default.CounterattackDodgeUnitValue;
+	SetUnitValEffect.CleanupType = eCleanup_BeginTurn;
+	Template.AddTargetEffect(SetUnitValEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
+
+	return Template;
+}
+
+// Activates the Attack when a melee attack misses or grazes
+static function X2AbilityTemplate ParryCounterattack()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityTrigger_EventListener EventListener;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_Parry_Counterattack');
+	Template.IconImage = "img:///UILibrary_LW_Overhaul.LW_Ability_Combatives";
+
+	Template.bDontDisplayInAbilitySummary = true;
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Offensive;
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	EventListener = new class'X2AbilityTrigger_EventListener';
+	EventListener.ListenerData.Deferral = ELD_OnStateSubmitted;
+	EventListener.ListenerData.EventID = 'AbilityActivated';
+	EventListener.ListenerData.EventFn = class'XComGameState_Ability'.static.MeleeCounterattackListener;  // this probably has to change
+	Template.AbilityTriggers.AddItem(EventListener);
+
+	Template.AbilityToHitCalc = default.DeadEye;
+
+	Template.AbilityTargetStyle = default.SelfTarget;
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.CinescriptCameraType = "Muton_Counterattack";  // might need to change this to ranger or stun lancer ...
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
+
+	return Template;
+}
+
+// Mind Blast
+// (AbilityName="F_MindBlast", ApplyToWeaponSlot=eInvSlot_SecondaryWeapon)
+// Deal a small amount of damage based on secondary weapon tier and remove action points from the target for next turn. Cooldown-based.
+static function X2AbilityTemplate MindBlast()
+{
+	local X2AbilityTemplate                 Template;
+	local X2AbilityCost_ActionPoints        ActionPointCost;
+	local X2Condition_UnitProperty          TargetProperty;
+	local X2Effect_ApplyWeaponDamage        WeaponDamageEffect;
+	local X2AbilityCooldown                 Cooldown;
+	local X2Effect_Stunned					StunnedEffect;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'F_MindBlast');
+
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.bConsumeAllPoints = true;
+	Template.AbilityCosts.AddItem(ActionPointCost);
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.CLASS_SQUADDIE_PRIORITY;
+
+	Cooldown = new class'X2AbilityCooldown';
+	Cooldown.iNumTurns = default.MINDBLAST_COOLDOWN;
+	Template.AbilityCooldown = Cooldown;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	TargetProperty = new class'X2Condition_UnitProperty';
+	TargetProperty.ExcludeRobotic = true;
+	TargetProperty.FailOnNonUnits = true;
+	Template.AbilityTargetConditions.AddItem(TargetProperty);
+	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
+
+	WeaponDamageEffect = new class'X2Effect_ApplyWeaponDamage';
+	WeaponDamageEffect.bIgnoreBaseDamage = true;
+	WeaponDamageEffect.DamageTag = 'F_MindBlast';
+	WeaponDamageEffect.bBypassShields = true;
+	WeaponDamageEffect.bIgnoreArmor = true;
+	Template.AddTargetEffect(WeaponDamageEffect);
+
+	StunnedEffect = class'X2StatusEffects'.static.CreateStunnedStatusEffect(default.MINDBLAST_STUN_ACTIONS, 100, false);
+	StunnedEffect.bRemoveWhenSourceDies = false;
+	Template.AddTargetEffect(StunnedEffect);
+
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+	Template.Hostility = eHostility_Offensive;
+
+	Template.IconImage = "img:///UILibrary_FavidsPerkPack.UIPerk_MindBlast";
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+	Template.AbilitySourceName = 'eAbilitySource_Psionic';
+	Template.bShowActivation = false;
+	Template.CustomFireAnim = 'HL_Psi_ProjectileMedium';
+
+	Template.ActivationSpeech = 'Mindblast';
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.CinescriptCameraType = "Psionic_FireAtUnit";
+
+	Template.bCrossClassEligible = default.MINDBLAST_AWC;
+
+	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
+	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
+
+	return Template;
+}
+
+// Sense Panic
+// (AbilityName="F_SensePanic")
+// Shots against targets that are suffering from mental impairments ignore half of cover bonuses
+static function X2AbilityTemplate SensePanic()
+{
+	local X2AbilityTemplate Template;
+	local XMBEffect_ConditionalBonus LowCoverBonusEffect;
+	local XMBEffect_ConditionalBonus FullCoverBonusEffect;
+
+	Template = Passive('F_SensePanic', "img:///UILibrary_XPerkIconPack.UIPerk_enemy_shot_psi", default.SENSEPANIC_AWC, none);
+
+    // Bonus for when targets are in low cover
+	LowCoverBonusEffect = new class'XMBEffect_ConditionalBonus';
+	LowCoverBonusEffect.AbilityTargetConditions.AddItem(default.HalfCoverCondition);
+	LowCoverBonusEffect.AbilityTargetConditions.AddItem(new class'X2Condition_UnitAffectedByMentalEffect');
+	LowCoverBonusEffect.AddToHitModifier(class'X2AbilityToHitCalc_StandardAim'.default.LOW_COVER_BONUS / 2);
+    AddSecondaryEffect(Template, LowCoverBonusEffect);
+    
+    // Bonus for when targets are in full cover
+	FullCoverBonusEffect = new class'XMBEffect_ConditionalBonus';
+	FullCoverBonusEffect.AbilityTargetConditions.AddItem(default.FullCoverCondition);
+	LowCoverBonusEffect.AbilityTargetConditions.AddItem(new class'X2Condition_UnitAffectedByMentalEffect');
+	FullCoverBonusEffect.AddToHitModifier(class'X2AbilityToHitCalc_StandardAim'.default.HIGH_COVER_BONUS / 2);
+    AddSecondaryEffect(Template, FullCoverBonusEffect);
+
+    return Template;
+}
+
+// Over Exertion
+// (AbilityName="F_OverExertion")
+// Immediately gain a full action point
+static function X2AbilityTemplate OverExertion()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_GrantActionPoints PointEffect;
+
+	// Grants the action point
+	PointEffect = new class'X2Effect_GrantActionPoints';
+	PointEffect.NumActionPoints = 1;
+	PointEffect.PointType = class'X2CharacterTemplateManager'.default.StandardActionPoint;
+	
+	// Activated ability that targets user
+	Template = SelfTargetActivated('F_OverExertion', "img:///UILibrary_DLC3Images.UIPerk_spark_overdrive", default.OVEREXERTION_AWC, PointEffect, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_Free);
+	
+	// Cannot be used while burning, etc.
+	Template.AddShooterEffectExclusions();
+
+	// Charges
+	AddCharges(Template, default.OVEREXERTION_CHARGES);
+
+	// Cooldown
+	AddCooldown(Template, default.OVEREXERTION_COOLDOWN);
+
+	// Show a flyover when activated
+	Template.bShowActivation = true;
+
+    return Template;
+}
+
+// Riot Control
+// (AbilityName="F_RiotControl")
+// Grants a free Flashbang and Smoke Grenade
+static function X2AbilityTemplate RiotControl()
+{
+	local X2AbilityTemplate Template;
+
+	// Create the template using a helper function
+	Template = Passive('F_RiotControl', "img:///UILibrary_PerkIcons.UIPerk_grenade_flash", default.RIOTCONTROL_AWC, none);
+	
+	// Hack to make this work for LWOTC (won't work in just WOTC)
+	Template.AdditionalAbilities.AddItem('SmokeGrenade');
+	Template.AdditionalAbilities.AddItem('Flashbanger');
 
 	return Template;
 }

@@ -45,22 +45,34 @@ function bool IsEffectCurrentlyRelevant(XComGameState_Effect EffectGameState, XC
 {
 	local XComGameState_Unit SourceUnit;
 
+	//`LOG("=== Verifying if effect relevant: " @ EffectName);
+	//`LOG("=== SourceUnit: " @ SourceUnit.GetFullName());
+	//`LOG("=== TargetUnit: " @ TargetUnit.GetFullName());
+
 	SourceUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(EffectGameState.ApplyEffectParameters.SourceStateObjectRef.ObjectID));
 	
 	if (SourceUnit == none || SourceUnit.IsDead() || TargetUnit == none || TargetUnit.IsDead())
+	{
+		//`LOG("=== Not relevant: Invalid source or target");
 		return false;
+	}
 
     if (SourceUnit.ObjectID == TargetUnit.ObjectID)
     {
+		//`LOG("=== Same source and target. Relevant?: " @ string(IncludeOwner));
         return IncludeOwner;
     }
     else
 	{
 		//  jbouscher: uses tile range rather than unit range so the visual check can match this logic
 		if (!class'Helpers'.static.IsTileInRange(SourceUnit.TileLocation, TargetUnit.TileLocation, AOEDistanceSquared))
+		{
+			//`LOG("=== Not Relevant: Target not in range of source");
 			return false;
+		}
 	}
-
+	
+	//`LOG("=== Effect relevant: " @ EffectName);
 	return true;
 }
 
