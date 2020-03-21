@@ -199,6 +199,8 @@ var config float RAMPART_DAMAGE_MODIFIER;
 var config int RAMPART_RADIUS;
 var config int RAMPART_COOLDOWN;
 var config bool RAMPART_AWC;
+var config int STRONGBACK_MAX_REDUCTION;
+var config float STRONGBACK_MOBILITY_MULTIPLIER;
 var config bool STRONGBACK_AWC;
 var config int COORDINATEFIRE_COOLDOWN;
 var config int COORDINATEFIRE_RADIUS;

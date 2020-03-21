@@ -1,6 +1,8 @@
 class X2Effect_ReverseUtilityMobilityPenalites extends X2Effect_ModifyStats;
 
 var array<EInventorySlot> SlotsToCheck;
+var int MaxReduction;
+var float MobilityMultiplier;
 
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
@@ -30,6 +32,13 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 				}
 			}
 		}
+	}
+
+	MobilityOffset = MobilityOffset * MobilityMultiplier;
+
+	if (MobilityOffset > MaxReduction)
+	{
+		MobilityOffset = MaxReduction;
 	}
 	
 	EffectStatChange.StatType = eStat_Mobility;
