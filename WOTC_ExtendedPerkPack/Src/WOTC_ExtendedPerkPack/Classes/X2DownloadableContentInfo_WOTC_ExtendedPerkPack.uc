@@ -59,8 +59,8 @@ static event OnPostTemplatesCreated()
 
     PatchSmokeGrenadeForRegenerativeMist('SmokeGrenade');
     PatchSmokeGrenadeForRegenerativeMist('SmokeGrenadeMk2');
-    PatchSmokeGrenadeForCombatDrugs('DenseSmokeGrenade');
-    PatchSmokeGrenadeForCombatDrugs('DenseSmokeGrenadeMk2');
+    PatchSmokeGrenadeForRegenerativeMist('DenseSmokeGrenade');
+    PatchSmokeGrenadeForRegenerativeMist('DenseSmokeGrenadeMk2');
 
 	PatchAbilityForControlledFire('LW2WotC_AreaSuppressionShot');
 	PatchAbilityForControlledFire('AreaSuppressionShot_LW');
@@ -226,17 +226,24 @@ private static function PatchAbilityForControlledFire(name AbilityName)
 private static function PatchSuppressionForSuppressingFire()
 {
 	local X2AbilityTemplate Template;
+	local X2AbilityTemplate LWOTCTemplate;
 	local X2AbilityTrigger_EventListener Trigger;
 
-	// Look for LWOTC's version of Suppression, and use that if it's available
-	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('Suppression_LW');
-
-	if (Template == none)
+	// Allow LWOTC's version of Suppression to trigger from Suppressing Fire
+	LWOTCTemplate = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('Suppression_LW');
+	if (LWOTCTemplate != none)
 	{
-		// If it's not, use the base game version
-		Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('Suppression');
+		// Create a trigger that will cause the suppression ability to activate when Suppressing Fire is used
+		Trigger = new class'X2AbilityTrigger_EventListener';
+		Trigger.ListenerData.Deferral = ELD_OnStateSubmitted;
+		Trigger.ListenerData.EventID = 'Suppressing';
+		Trigger.ListenerData.Filter = eFilter_Unit;
+		Trigger.ListenerData.EventFn = class'XComGameState_Ability'.static.AbilityTriggerEventListener_OriginalTarget;
+		LWOTCTemplate.AbilityTriggers.AddItem(Trigger);
 	}
 	
+	// Allow the base game's Suppression to trigger from Suppressing Fire
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('Suppression');
 	if (Template != none)
 	{
 		// Create a trigger that will cause the suppression ability to activate when Suppressing Fire is used
