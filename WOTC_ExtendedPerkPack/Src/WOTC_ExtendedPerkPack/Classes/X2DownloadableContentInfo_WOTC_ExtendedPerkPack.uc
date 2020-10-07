@@ -581,6 +581,27 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'OVEREXERTION_CHARGES':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.OVEREXERTION_CHARGES);
 			return true;
+		case 'SPOT_DURATION':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SPOT_DURATION);
+			return true;
+		case 'SPOT_COOLDOWN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SPOT_COOLDOWN);
+			return true;
+		case 'SPOT_RANGE':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SPOT_RANGE);
+			return true;
+		case 'SPOT_RADIUS':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.SPOT_RADIUS);
+			return true;
+		case 'EXPOSEWEAKNESS_DAMAGEMODIFIER':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.EXPOSEWEAKNESS_DAMAGEMODIFIER);
+			return true;
+		case 'EXPOSEWEAKNESS_DURATION':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.EXPOSEWEAKNESS_DURATION);
+			return true;
+		case 'EXPOSEWEAKNESS_COOLDOWN':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.EXPOSEWEAKNESS_COOLDOWN);
+			return true;
 		default:
 			return false;
 	}

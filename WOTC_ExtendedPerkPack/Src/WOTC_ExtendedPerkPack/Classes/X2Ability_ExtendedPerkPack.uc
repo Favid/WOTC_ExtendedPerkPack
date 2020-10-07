@@ -217,6 +217,15 @@ var config int OVEREXERTION_CHARGES;
 var config int OVEREXERTION_COOLDOWN;
 var config bool OVEREXERTION_AWC;
 var config bool RIOTCONTROL_AWC;
+var config int SPOT_RANGE;
+var config int SPOT_RADIUS;
+var config int SPOT_DURATION;
+var config int SPOT_COOLDOWN;
+var config bool SPOT_AWC;
+var config int EXPOSEWEAKNESS_DAMAGEMODIFIER;
+var config int EXPOSEWEAKNESS_DURATION;
+var config int EXPOSEWEAKNESS_COOLDOWN;
+var config bool EXPOSEWEAKNESS_AWC;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -344,7 +353,12 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(SensePanic());
 	Templates.AddItem(OverExertion());
 	Templates.AddItem(RiotControl());
-
+	Templates.AddItem(Spot());
+	Templates.AddItem(ExposeWeakness());
+	Templates.AddItem(Chemist());
+	Templates.AddItem(Poisonous());
+	Templates.AddItem(CircuitBreaker());
+	
 	return Templates;
 }
 
@@ -4294,4 +4308,133 @@ static function X2AbilityTemplate RiotControl()
 	Template.AdditionalAbilities.AddItem('Flashbanger');
 
 	return Template;
+}
+
+// Spot
+// (AbilityName="F_Spot")
+// Visually scan a small area, highlighting any enemies in the radius, even if you lose line of sight. Also immediately reveals Faceless and Chryssalids in the area of effect.
+static function X2AbilityTemplate Spot()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_ScanningProtocol     EnemyScanningEffect;
+	local X2Effect_ScanningProtocol     CivilianScanningEffect;
+	local X2Condition_UnitProperty		CivilianProperty;
+	local X2AbilityTarget_Cursor		CursorTarget;
+	local X2AbilityMultiTarget_Radius	RadiusMultiTarget;
+
+	// Start with the targeted debuff template
+	Template = TargetedDebuff('F_Spot', "img:///UILibrary_FavidsPerkPack.UIPerk_Spot", default.SPOT_AWC, none, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_Single);
+	Template.Hostility = eHostility_Neutral;
+	Template.AbilityTargetConditions.Length = 0;
+
+	// Cursor target
+	CursorTarget = new class'X2AbilityTarget_Cursor';
+	CursorTarget.FixedAbilityRange = default.SPOT_RANGE;
+	Template.AbilityTargetStyle = CursorTarget;
+	
+	// Circular target radius
+	RadiusMultiTarget = new class'X2AbilityMultiTarget_Radius';
+	RadiusMultiTarget.fTargetRadius = default.SPOT_RADIUS;
+	RadiusMultiTarget.bIgnoreBlockingCover = true;
+	Template.AbilityMultiTargetStyle = RadiusMultiTarget;
+
+	// Same as grenade targetting, but doesn't use grenade path
+	Template.TargetingMethod = class'X2TargetingMethod_GremlinAOE';
+	
+	// Always remain concealed
+	Template.ConcealmentRule = eConceal_Always;
+	Template.bSilentAbility = true;
+
+	// Effect on enemies
+	EnemyScanningEffect = new class'X2Effect_ScanningProtocol';
+	EnemyScanningEffect.BuildPersistentEffect(default.SPOT_DURATION, false, true, false, eGameRule_PlayerTurnEnd);
+	EnemyScanningEffect.TargetConditions.AddItem(default.LivingHostileUnitOnlyProperty);
+	Template.AddMultiTargetEffect(EnemyScanningEffect);
+
+	// Effect on civilans, so we can reveal them if they're Faceless
+	CivilianScanningEffect = new class'X2Effect_ScanningProtocol';
+	CivilianScanningEffect.BuildPersistentEffect(default.SPOT_DURATION, false, true, false, eGameRule_PlayerTurnEnd);
+	CivilianProperty = new class'X2Condition_UnitProperty';
+	CivilianProperty.ExcludeNonCivilian = true;
+	CivilianProperty.ExcludeHostileToSource = false;
+	CivilianProperty.ExcludeFriendlyToSource = false;
+	CivilianScanningEffect.TargetConditions.AddItem(CivilianProperty);
+	Template.AddMultiTargetEffect(CivilianScanningEffect);	
+
+	// Cooldown
+	AddCooldown(Template, default.SPOT_COOLDOWN);
+	
+	return Template;
+}
+
+// Expose Weakness
+// (AbilityName="F_ExposeWeakness")
+// Increases damage taken by the targetted unit for a few turns. Cooldown-based.
+static function X2AbilityTemplate ExposeWeakness()
+{
+	local X2AbilityTemplate				Template;
+	local X2Effect_WeaknessExposed		WeaknessExposedEffect;
+	
+	// Weakness Exposed Effect
+	WeaknessExposedEffect = new class 'X2Effect_WeaknessExposed';
+	WeaknessExposedEffect.DamageModifier = default.EXPOSEWEAKNESS_DAMAGEMODIFIER;
+	WeaknessExposedEffect.BuildPersistentEffect(default.EXPOSEWEAKNESS_DURATION, false, true, false, eGameRule_PlayerTurnEnd);
+	WeaknessExposedEffect.bRemoveWhenTargetDies = true;
+
+	// Start with the targeted debuff template
+	Template = TargetedDebuff('F_ExposeWeakness', "img:///UILibrary_FavidsPerkPack.UIPerk_ExposeWeakness", default.EXPOSEWEAKNESS_AWC, WeaknessExposedEffect, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_Single);
+	
+	// Cooldown
+	AddCooldown(Template, default.EXPOSEWEAKNESS_COOLDOWN);
+
+	// Cannot be used while burning, etc.
+	Template.AddShooterEffectExclusions();
+	
+	// Always remain concealed
+	Template.ConcealmentRule = eConceal_Always;
+	Template.bSilentAbility = true;
+
+	return Template;
+}
+
+// Chemist
+// (AbilityName="F_Chemist")
+// Grants 1 free acid grenade item to your inventory.
+static function X2AbilityTemplate Chemist()
+{
+	local X2Effect_AddGrenade ItemEffect;
+
+	ItemEffect = new class 'X2Effect_AddGrenade';
+	ItemEffect.DataName = 'AcidGrenade';
+	ItemEffect.SkipAbilities.AddItem('SmallItemWeight');
+
+	return Passive('F_Chemist', "img:///UILibrary_PerkIcons.UIPerk_grenade_acidbomb", true, ItemEffect);
+}
+
+// Poisonous
+// (AbilityName="F_Poisonous")
+// Grants 1 free gas grenade item to your inventory.
+static function X2AbilityTemplate Poisonous()
+{
+	local X2Effect_AddGrenade ItemEffect;
+
+	ItemEffect = new class 'X2Effect_AddGrenade';
+	ItemEffect.DataName = 'GasGrenade';
+	ItemEffect.SkipAbilities.AddItem('SmallItemWeight');
+
+	return Passive('F_Poisonous', "img:///UILibrary_PerkIcons.UIPerk_grenade_gas", true, ItemEffect);
+}
+
+// Circuit Breaker
+// (AbilityName="F_CircuitBreaker")
+// Grants 1 free EMP grenade item to your inventory.
+static function X2AbilityTemplate CircuitBreaker()
+{
+	local X2Effect_AddGrenade ItemEffect;
+
+	ItemEffect = new class 'X2Effect_AddGrenade';
+	ItemEffect.DataName = 'EMPGrenade';
+	ItemEffect.SkipAbilities.AddItem('SmallItemWeight');
+
+	return Passive('F_CircuitBreaker', "img:///UILibrary_PerkIcons.UIPerk_grenade_emp", true, ItemEffect);
 }

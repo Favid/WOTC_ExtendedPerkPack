@@ -101,6 +101,9 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_AddGremlinAbilityCharges.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_AddGrenade.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_AddOverwatchActionPoints.uc">
       <SubType>Content</SubType>
     </Content>
@@ -186,6 +189,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ToHitBonusAOE.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_WeaknessExposed.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2EventListener_ExtendedPerkPackuc.uc">
