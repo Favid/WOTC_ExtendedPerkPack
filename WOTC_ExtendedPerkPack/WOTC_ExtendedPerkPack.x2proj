@@ -18,10 +18,10 @@
     <Folder Include="Src\XModBase" />
     <Folder Include="Src\XModBase\Classes" />
     <Folder Include="Src\XModBase_Interfaces" />
-    <Folder Include="Src\XModBase_Core_2_0_1" />
+    <Folder Include="Src\XModBase_Core_2_0_2" />
     <Folder Include="Src\WOTC_ExtendedPerkPack\" />
     <Folder Include="Src\WOTC_ExtendedPerkPack\Classes\" />
-    <Folder Include="Src\XModBase_Core_2_0_1\Classes" />
+    <Folder Include="Src\XModBase_Core_2_0_2\Classes" />
     <Folder Include="Src\XModBase_Interfaces\Classes" />
   </ItemGroup>
   <ItemGroup>
@@ -308,25 +308,25 @@
     <Content Include="Src\XModBase\Classes\XMBValue_Visibility.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBAbilityCost_ActionPoints.uc">
+    <Content Include="Src\XModBase_Core_2_0_2\Classes\XMBAbilityCost_ActionPoints.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBAbilityMultiTarget_Radius.uc">
+    <Content Include="Src\XModBase_Core_2_0_2\Classes\XMBAbilityMultiTarget_Radius.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBAbilityTag.uc">
+    <Content Include="Src\XModBase_Core_2_0_2\Classes\XMBAbilityTag.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBAbilityToHitCalc_StandardAim.uc">
+    <Content Include="Src\XModBase_Core_2_0_2\Classes\XMBAbilityToHitCalc_StandardAim.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBConfig.uc">
+    <Content Include="Src\XModBase_Core_2_0_2\Classes\XMBConfig.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBDownloadableContentInfo_XModBase.uc">
+    <Content Include="Src\XModBase_Core_2_0_2\Classes\XMBDownloadableContentInfo_XModBase.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase_Core_2_0_1\Classes\XMBTargetingMethod_Grenade.uc">
+    <Content Include="Src\XModBase_Core_2_0_2\Classes\XMBTargetingMethod_Grenade.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\XModBase_Interfaces\Classes\XMBEffectInterface.uc">

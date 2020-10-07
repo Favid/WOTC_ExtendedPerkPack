@@ -275,6 +275,8 @@ static function X2AbilityTemplate Attack(name DataName, string IconImage, option
 
 	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
 
+	Template.AddShooterEffectExclusions();
+
 	VisibilityCondition = new class'X2Condition_Visibility';
 	VisibilityCondition.bRequireGameplayVisible = true;
 	VisibilityCondition.bAllowSquadsight = true;
