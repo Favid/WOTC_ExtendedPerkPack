@@ -341,6 +341,9 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'PIERCETHEVEIL_COOLDOWN':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PIERCETHEVEIL_COOLDOWN);
 			return true;
+		case 'PIERCETHEVEIL_INCREASE_COOLDOWN_AMOUNT':
+			OutString = string(class'X2Ability_ExtendedPerkPack'.default.PIERCETHEVEIL_INCREASE_COOLDOWN_AMOUNT);
+			return true;
 		case 'THEBIGGERTHEYARE_AIM_BONUS':
 			OutString = string(class'X2Ability_ExtendedPerkPack'.default.THEBIGGERTHEYARE_AIM_BONUS);
 			return true;

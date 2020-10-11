@@ -134,6 +134,9 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_GuaranteeBleedout.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_IgnoreFlankingCritChance.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_Immobilize.uc">
       <SubType>Content</SubType>
     </Content>

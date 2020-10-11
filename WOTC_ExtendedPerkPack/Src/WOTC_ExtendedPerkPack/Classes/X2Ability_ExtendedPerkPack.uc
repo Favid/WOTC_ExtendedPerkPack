@@ -358,6 +358,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Chemist());
 	Templates.AddItem(Poisonous());
 	Templates.AddItem(CircuitBreaker());
+	Templates.AddItem(CoveringAllAngles());
 	
 	return Templates;
 }
@@ -2600,7 +2601,7 @@ static function X2AbilityTemplate Adrenaline()
 	local X2Condition_UnitValue ValueCondition;
 	local X2Effect_IncrementUnitValue IncrementEffect;
     
-	// Create a persistent stat change effect that grants a mobility bonus
+	// Create a persistent stat change effect that grants a shield bonus
 	Effect = new class'X2Effect_PersistentStatChange';
 	Effect.EffectName = 'F_Adrenaline';
 	Effect.AddPersistentStatChange(eStat_ShieldHP, default.ADRENALINE_SHIELD);
@@ -2847,6 +2848,7 @@ static function X2AbilityTemplate ShieldTrauma()
 	local X2AbilityTemplate                 Template;
 
 	Template = class'X2Ability_RangerAbilitySet'.static.AddSwordSliceAbility('F_ShieldTrauma');
+	Template.IconImage = "img:///WoTC_Shield_UI.ShieldBash_Icon";
 
 	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateDisorientedStatusEffect(true, , false));
 	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateStunnedStatusEffect(1, 100, false));
@@ -4437,4 +4439,18 @@ static function X2AbilityTemplate CircuitBreaker()
 	ItemEffect.SkipAbilities.AddItem('SmallItemWeight');
 
 	return Passive('F_CircuitBreaker', "img:///UILibrary_PerkIcons.UIPerk_grenade_emp", true, ItemEffect);
+}
+
+// Covering All Angles
+// (AbilityName="F_CoveringAllAngles")
+// Enemies no longer gain bonus crit chance when flanking you.
+static function X2AbilityTemplate CoveringAllAngles()
+{
+    local X2Effect_IgnoreFlankingCritChance		    Effect;
+
+    // Create the crit protection effect
+    Effect = new class'X2Effect_IgnoreFlankingCritChance';
+	Effect.EffectName = 'F_CoveringAllAngles_CritProtection';
+
+	return Passive('F_CoveringAllAngles', "img:///UILibrary_XPerkIconPack.UIPerk_defense_x2", true, Effect);
 }
