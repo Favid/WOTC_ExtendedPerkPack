@@ -226,6 +226,8 @@ var config int EXPOSEWEAKNESS_DAMAGEMODIFIER;
 var config int EXPOSEWEAKNESS_DURATION;
 var config int EXPOSEWEAKNESS_COOLDOWN;
 var config bool EXPOSEWEAKNESS_AWC;
+var config int BLOWBACK_CONEENDDIAMETERTILES;
+var config int BLOWBACK_CONELENGTHTILES;
 
 var localized string LocCombatDrugsEffect;
 var localized string LocCombatDrugsEffectDescription;
@@ -359,6 +361,9 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Poisonous());
 	Templates.AddItem(CircuitBreaker());
 	Templates.AddItem(CoveringAllAngles());
+	Templates.AddItem(Blowback());
+	Templates.AddItem(BlowbackAttack());
+	Templates.AddItem(HiDefHolo());
 	
 	return Templates;
 }
@@ -2845,20 +2850,7 @@ static function X2AbilityTemplate Rally()
 // Upgrade to Shield Bash that stuns the target for one action in addition to disorienting them.
 static function X2AbilityTemplate ShieldTrauma()
 {
-	local X2AbilityTemplate                 Template;
-
-	Template = class'X2Ability_RangerAbilitySet'.static.AddSwordSliceAbility('F_ShieldTrauma');
-	Template.IconImage = "img:///WoTC_Shield_UI.ShieldBash_Icon";
-
-	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateDisorientedStatusEffect(true, , false));
-	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateStunnedStatusEffect(1, 100, false));
-    
-	Template.OverrideAbilities.AddItem('ShieldBash');
-
-	// If this ability is set up as a cross class ability, but it's not directly assigned to any classes, this is the weapon slot it will use
-	Template.DefaultSourceItemSlot = eInvSlot_SecondaryWeapon;
-
-	return Template;
+	return PurePassive('F_ShieldTrauma', "img:///WoTC_Shield_UI.ShieldBash_Icon", false, 'eAbilitySource_Perk');
 }
 
 // Avenger
@@ -4452,5 +4444,77 @@ static function X2AbilityTemplate CoveringAllAngles()
     Effect = new class'X2Effect_IgnoreFlankingCritChance';
 	Effect.EffectName = 'F_CoveringAllAngles_CritProtection';
 
-	return Passive('F_CoveringAllAngles', "img:///UILibrary_XPerkIconPack.UIPerk_defense_x2", true, Effect);
+	return Passive('F_CoveringAllAngles', "img:///UILibrary_XPerkIconPack.UIPerk_defense_x2", false, Effect);
+}
+
+// Blowback
+// (AbilityName="F_Blowback")
+// Shield Bash now hits in a cone behind the target
+static function X2AbilityTemplate Blowback()
+{
+	local X2AbilityTemplate						Template;
+
+	Template = PurePassive('F_Blowback', "img:///WoTC_Shield_UI.ShieldBash_Icon", , 'eAbilitySource_Perk');
+
+	Template.AdditionalAbilities.AddItem('F_Blowback_Attack');
+
+	return Template;
+}
+
+static function X2AbilityTemplate BlowbackAttack()
+{
+	local X2AbilityTemplate                 Template;
+	local X2AbilityMultiTarget_Cone			ConeMultiTarget;
+
+	Template = class'X2Ability_RangerAbilitySet'.static.AddSwordSliceAbility('F_Blowback_Attack');
+	Template.OverrideAbilities.AddItem('ShieldBash');
+	Template.IconImage = "img:///WoTC_Shield_UI.ShieldBash_Icon";
+
+	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateDisorientedStatusEffect(true, , false));
+
+	Template.CustomFireAnim = 'FF_MeleeShieldBash';
+	Template.CustomFireKillAnim = 'FF_MeleeShieldBash';
+	Template.CustomMovingFireAnim = 'FF_MeleeShieldBash';
+	Template.CustomMovingFireKillAnim = 'FF_MeleeShieldBash';
+	Template.CustomMovingTurnLeftFireAnim = 'FF_MeleeShieldBash';
+	Template.CustomMovingTurnLeftFireKillAnim = 'FF_MeleeShieldBash';
+	Template.CustomMovingTurnRightFireAnim = 'FF_MeleeShieldBash';
+	Template.CustomMovingTurnRightFireKillAnim = 'FF_MeleeShieldBash';
+	
+	Template.TargetingMethod = class'X2TargetingMethod_ArcWave';
+	
+	ConeMultiTarget = new class'X2AbilityMultiTarget_Cone';
+	ConeMultiTarget.ConeEndDiameter = default.BLOWBACK_CONEENDDIAMETERTILES * class'XComWorldData'.const.WORLD_StepSize;
+	ConeMultiTarget.ConeLength = default.BLOWBACK_CONELENGTHTILES * class'XComWorldData'.const.WORLD_StepSize;
+	ConeMultiTarget.fTargetRadius = Sqrt(Square(ConeMultiTarget.ConeEndDiameter / 2) + Square(ConeMultiTarget.ConeLength)) * class'XComWorldData'.const.WORLD_UNITS_TO_METERS_MULTIPLIER;
+	ConeMultiTarget.bExcludeSelfAsTargetIfWithinRadius = true;
+	ConeMultiTarget.bLockShooterZ = true;
+	Template.AbilityMultiTargetStyle = ConeMultiTarget;
+
+	Template.AbilityMultiTargetConditions.AddItem(default.LivingHostileUnitOnlyProperty);
+
+	Template.AddMultiTargetEffect(new class'X2Effect_ApplyWeaponDamage');
+	Template.AddMultiTargetEffect(class'X2StatusEffects'.static.CreateDisorientedStatusEffect(true, , false));
+
+	return Template;
+}
+
+// HiDef Holo
+// (AbilityName="F_HiDefHolo")
+// Your Holotargeted enemies are easier to critically hit, and reaction fire from any squadmate, including you, can critically hit them
+static function X2AbilityTemplate HiDefHolo()
+{
+	local X2AbilityTemplate Template;
+
+	// Create the template using a helper function
+	Template = Passive('F_HiDefHolo', "img:///UILibrary_LW_Overhaul.LW_AbilityHDHolo", false, none);
+	
+	// Grants this effect to all allies on the mission
+	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+	Template.AddMultiTargetEffect(new class'X2Effect_AllowCritOnHolotargeted');
+	
+	// Add the actual HiDef Holo ability from LW2/LWOTC
+	Template.AdditionalAbilities.AddItem('HDHolo');
+
+	return Template;
 }

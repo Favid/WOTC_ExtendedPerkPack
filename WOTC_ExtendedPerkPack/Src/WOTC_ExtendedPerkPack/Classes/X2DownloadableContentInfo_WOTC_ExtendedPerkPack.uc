@@ -70,6 +70,9 @@ static event OnPostTemplatesCreated()
 	PatchAbilityForCoordinateFire('StandardShot');
 	PatchAbilityForCoordinateFire('SniperStandardFire');
 	PatchAbilityForCoordinateFire('LightEmUp');
+
+	PatchAbilityForShieldTrauma('ShieldBash');
+	PatchAbilityForShieldTrauma('F_Blowback_Attack');
 }
 
 static function PatchAbilityForImposition(name AbilityName)
@@ -265,6 +268,24 @@ private static function PatchAbilityForCoordinateFire(name AbilityName)
 	if (Template != none)
 	{
 		Template.AdditionalAbilities.AddItem('F_CoordinateFire_Followup');
+	}
+}
+
+private static function PatchAbilityForShieldTrauma(name AbilityName)
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_Stunned TraumaStun;
+	local X2Condition_AbilityProperty TraumaCondition;
+
+	Template = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(AbilityName);
+
+	if (Template != none)
+	{
+		TraumaStun = class'X2StatusEffects'.static.CreateStunnedStatusEffect(1, 100, false);
+		TraumaCondition = new class'X2Condition_AbilityProperty';
+		TraumaCondition.OwnerHasSoldierAbilities.AddItem('F_ShieldTrauma');
+		TraumaStun.TargetConditions.AddItem(TraumaCondition);
+		Template.AddTargetEffect(TraumaStun);
 	}
 }
 

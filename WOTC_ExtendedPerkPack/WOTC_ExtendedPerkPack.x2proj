@@ -107,6 +107,9 @@
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_AddOverwatchActionPoints.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_AllowCritOnHolotargeted.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_ExtendedPerkPack\Classes\X2Effect_ApplyHeal.uc">
       <SubType>Content</SubType>
     </Content>
